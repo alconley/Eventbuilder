@@ -31,7 +31,7 @@ impl EventBuilder {
         if hit.timestamp - self.event[0].timestamp < self.coincidence_window {
             self.event.push(hit.clone());
         } else {
-            self.ready_event = self.event.clone();
+            self.ready_event.clone_from(&self.event);
             self.is_event_ready = true;
             self.event.clear();
             self.event.push(hit.clone());

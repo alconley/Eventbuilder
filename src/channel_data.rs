@@ -53,6 +53,8 @@ pub enum ChannelDataField {
     Cebra4Energy,
     Cebra5Energy,
     Cebra6Energy,
+    Cebra7Energy,
+    Cebra8Energy,
 
     Cebra0Short,
     Cebra1Short,
@@ -61,6 +63,8 @@ pub enum ChannelDataField {
     Cebra4Short,
     Cebra5Short,
     Cebra6Short,
+    Cebra7Short,
+    Cebra8Short,
 
     Cebra0Time,
     Cebra1Time,
@@ -69,6 +73,8 @@ pub enum ChannelDataField {
     Cebra4Time,
     Cebra5Time,
     Cebra6Time,
+    Cebra7Time,
+    Cebra8Time,
 }
 
 impl ChannelDataField {
@@ -249,6 +255,18 @@ impl ChannelData {
                     self.set_value(&ChannelDataField::Cebra6Energy, hit.energy);
                     self.set_value(&ChannelDataField::Cebra6Short, hit.energy_short);
                     self.set_value(&ChannelDataField::Cebra6Time, hit.timestamp);
+                }
+
+                ChannelType::Cebra7 => {
+                    self.set_value(&ChannelDataField::Cebra7Energy, hit.energy);
+                    self.set_value(&ChannelDataField::Cebra7Short, hit.energy_short);
+                    self.set_value(&ChannelDataField::Cebra7Time, hit.timestamp);
+                }
+
+                ChannelType::Cebra8 => {
+                    self.set_value(&ChannelDataField::Cebra8Energy, hit.energy);
+                    self.set_value(&ChannelDataField::Cebra8Short, hit.energy_short);
+                    self.set_value(&ChannelDataField::Cebra8Time, hit.timestamp);
                 }
 
                 _ => continue,
