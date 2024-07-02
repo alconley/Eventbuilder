@@ -331,6 +331,16 @@ impl EVBApp {
                                                 );
                                                 ui.selectable_value(
                                                     channel_type,
+                                                    ChannelType::Cebra7,
+                                                    "Cebra7",
+                                                );
+                                                ui.selectable_value(
+                                                    channel_type,
+                                                    ChannelType::Cebra8,
+                                                    "Cebra8",
+                                                );
+                                                ui.selectable_value(
+                                                    channel_type,
                                                     ChannelType::None,
                                                     "None",
                                                 );
