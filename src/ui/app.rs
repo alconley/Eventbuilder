@@ -11,14 +11,14 @@ use std::thread::JoinHandle;
 use eframe::egui::{self, Color32, RichText};
 use eframe::App;
 
-use super::channel_map::{Board, ChannelType};
-use super::compass_run::{process_runs, ProcessParams};
-use super::error::EVBError;
-use super::kinematics::KineParameters;
-use super::nuclear_data::MassMap;
-use super::scaler_list::ScalerEntryUI;
-use super::shift_map::ShiftMapEntry;
 use super::ws::{Workspace, WorkspaceError};
+use crate::evb::channel_map::{Board, ChannelType};
+use crate::evb::compass_run::{process_runs, ProcessParams};
+use crate::evb::error::EVBError;
+use crate::evb::kinematics::KineParameters;
+use crate::evb::nuclear_data::MassMap;
+use crate::evb::scaler_list::ScalerEntryUI;
+use crate::evb::shift_map::ShiftMapEntry;
 
 #[derive(Debug, Serialize, Deserialize)]
 struct EvbAppParams {

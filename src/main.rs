@@ -15,7 +15,7 @@ fn main() -> eframe::Result<()> {
     eframe::run_native(
         "Eventbuilder",
         native_options,
-        Box::new(|cc| Box::new(cebra_sps_eventbuilder::EVBApp::new(cc, false))),
+        Box::new(|cc| Box::new(eventbuilder::ui::app::EVBApp::new(cc, false))),
     )
 }
 
@@ -32,7 +32,7 @@ fn main() {
             .start(
                 "the_canvas_id", // hardcode it
                 web_options,
-                Box::new(|cc| Box::new(cebra_sps_eventbuilder::EVBApp::new(cc, false))),
+                Box::new(|cc| Box::new(eventbuilder::ui::app_web::EVBApp::new(cc, false))),
             )
             .await
             .expect("failed to start eframe");
