@@ -82,6 +82,117 @@ impl ChannelDataField {
     pub fn get_field_vec() -> Vec<ChannelDataField> {
         ChannelDataField::iter().collect()
     }
+
+    pub fn get_filtered_field_vec(channel_map: &ChannelMap) -> Vec<ChannelDataField> {
+        let all_delay_lines_present = channel_map
+            .contains_channel_type(ChannelType::DelayFrontLeft)
+            && channel_map.contains_channel_type(ChannelType::DelayFrontRight)
+            && channel_map.contains_channel_type(ChannelType::DelayBackLeft)
+            && channel_map.contains_channel_type(ChannelType::DelayBackRight);
+
+        ChannelDataField::iter()
+            .filter(|field| {
+                match field {
+                    // Include additional fields only if all delay line channels are present
+                    ChannelDataField::X1
+                    | ChannelDataField::X2
+                    | ChannelDataField::Xavg
+                    | ChannelDataField::Theta => all_delay_lines_present,
+                    // Filter other fields based on the channel map
+                    ChannelDataField::AnodeFrontEnergy
+                    | ChannelDataField::AnodeFrontShort
+                    | ChannelDataField::AnodeFrontTime => {
+                        channel_map.contains_channel_type(ChannelType::AnodeFront)
+                    }
+                    ChannelDataField::AnodeBackEnergy
+                    | ChannelDataField::AnodeBackShort
+                    | ChannelDataField::AnodeBackTime => {
+                        channel_map.contains_channel_type(ChannelType::AnodeBack)
+                    }
+                    ChannelDataField::ScintLeftEnergy
+                    | ChannelDataField::ScintLeftShort
+                    | ChannelDataField::ScintLeftTime => {
+                        channel_map.contains_channel_type(ChannelType::ScintLeft)
+                    }
+                    ChannelDataField::ScintRightEnergy
+                    | ChannelDataField::ScintRightShort
+                    | ChannelDataField::ScintRightTime => {
+                        channel_map.contains_channel_type(ChannelType::ScintRight)
+                    }
+                    ChannelDataField::CathodeEnergy
+                    | ChannelDataField::CathodeShort
+                    | ChannelDataField::CathodeTime => {
+                        channel_map.contains_channel_type(ChannelType::Cathode)
+                    }
+                    ChannelDataField::DelayFrontLeftEnergy
+                    | ChannelDataField::DelayFrontLeftShort
+                    | ChannelDataField::DelayFrontLeftTime => {
+                        channel_map.contains_channel_type(ChannelType::DelayFrontLeft)
+                    }
+                    ChannelDataField::DelayFrontRightEnergy
+                    | ChannelDataField::DelayFrontRightShort
+                    | ChannelDataField::DelayFrontRightTime => {
+                        channel_map.contains_channel_type(ChannelType::DelayFrontRight)
+                    }
+                    ChannelDataField::DelayBackLeftEnergy
+                    | ChannelDataField::DelayBackLeftShort
+                    | ChannelDataField::DelayBackLeftTime => {
+                        channel_map.contains_channel_type(ChannelType::DelayBackLeft)
+                    }
+                    ChannelDataField::DelayBackRightEnergy
+                    | ChannelDataField::DelayBackRightShort
+                    | ChannelDataField::DelayBackRightTime => {
+                        channel_map.contains_channel_type(ChannelType::DelayBackRight)
+                    }
+                    ChannelDataField::Cebra0Energy
+                    | ChannelDataField::Cebra0Short
+                    | ChannelDataField::Cebra0Time => {
+                        channel_map.contains_channel_type(ChannelType::Cebra0)
+                    }
+                    ChannelDataField::Cebra1Energy
+                    | ChannelDataField::Cebra1Short
+                    | ChannelDataField::Cebra1Time => {
+                        channel_map.contains_channel_type(ChannelType::Cebra1)
+                    }
+                    ChannelDataField::Cebra2Energy
+                    | ChannelDataField::Cebra2Short
+                    | ChannelDataField::Cebra2Time => {
+                        channel_map.contains_channel_type(ChannelType::Cebra2)
+                    }
+                    ChannelDataField::Cebra3Energy
+                    | ChannelDataField::Cebra3Short
+                    | ChannelDataField::Cebra3Time => {
+                        channel_map.contains_channel_type(ChannelType::Cebra3)
+                    }
+                    ChannelDataField::Cebra4Energy
+                    | ChannelDataField::Cebra4Short
+                    | ChannelDataField::Cebra4Time => {
+                        channel_map.contains_channel_type(ChannelType::Cebra4)
+                    }
+                    ChannelDataField::Cebra5Energy
+                    | ChannelDataField::Cebra5Short
+                    | ChannelDataField::Cebra5Time => {
+                        channel_map.contains_channel_type(ChannelType::Cebra5)
+                    }
+                    ChannelDataField::Cebra6Energy
+                    | ChannelDataField::Cebra6Short
+                    | ChannelDataField::Cebra6Time => {
+                        channel_map.contains_channel_type(ChannelType::Cebra6)
+                    }
+                    ChannelDataField::Cebra7Energy
+                    | ChannelDataField::Cebra7Short
+                    | ChannelDataField::Cebra7Time => {
+                        channel_map.contains_channel_type(ChannelType::Cebra7)
+                    }
+                    ChannelDataField::Cebra8Energy
+                    | ChannelDataField::Cebra8Short
+                    | ChannelDataField::Cebra8Time => {
+                        channel_map.contains_channel_type(ChannelType::Cebra8)
+                    }
+                }
+            })
+            .collect()
+    }
 }
 
 impl UsedSize for ChannelDataField {
@@ -118,6 +229,19 @@ impl UsedSize for ChannelData {
 }
 
 impl ChannelData {
+    // Constructor accepting a channel map to initialize only valid fields
+    pub fn new(channel_map: &ChannelMap) -> Self {
+        let fields = ChannelDataField::get_filtered_field_vec(channel_map);
+        let mut data = ChannelData {
+            fields: BTreeMap::new(),
+            rows: 0,
+        };
+        fields.into_iter().for_each(|f| {
+            data.fields.insert(f, vec![]);
+        });
+        data
+    }
+
     //To keep columns all same length, push invalid values as necessary
     fn push_defaults(&mut self) {
         for field in self.fields.iter_mut() {

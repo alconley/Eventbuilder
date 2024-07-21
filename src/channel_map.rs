@@ -131,4 +131,11 @@ impl ChannelMap {
     pub fn get_channel_data(&self, uuid: &u32) -> Option<&ChannelData> {
         return self.map.get(uuid);
     }
+
+    // Check if a channel type is present in the channel map
+    pub fn contains_channel_type(&self, channel_type: ChannelType) -> bool {
+        self.map
+            .values()
+            .any(|data| data.channel_type == channel_type)
+    }
 }

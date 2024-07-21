@@ -13,7 +13,7 @@ fn main() -> eframe::Result<()> {
         ..Default::default()
     };
     eframe::run_native(
-        "CeBrA - SE-SPS Eventbuilder",
+        "Eventbuilder",
         native_options,
         Box::new(|cc| Box::new(cebra_sps_eventbuilder::EVBApp::new(cc, false))),
     )

@@ -54,24 +54,12 @@ fn write_dataframe(data: ChannelData, filepath: &Path) -> Result<(), PolarsError
     Ok(())
 }
 
-fn write_dataframe_fragment(
-    data: ChannelData,
-    out_dir: &Path,
-    run_number: &i32,
-    frag_number: &i32,
-) -> Result<(), PolarsError> {
-    let frag_file_path = out_dir.join(format!("run_{}_{}.parquet", run_number, frag_number));
-    write_dataframe(data, &frag_file_path)?;
-    Ok(())
-}
-
-//Main function which processes a single run archive and writes the resulting event built data to parquet file
 fn process_run(
     params: RunParams<'_>,
     k_params: &KineParameters,
     progress: Arc<Mutex<f32>>,
 ) -> Result<(), EVBError> {
-    //Protective, ensure no loose files
+    // Protective, ensure no loose files
     clean_up_unpack_dir(&params.unpack_dir_path)?;
 
     let archive_file = File::open(&params.run_archive_path)?;
@@ -80,7 +68,7 @@ fn process_run(
 
     let mut scaler_list = Some(ScalerList::new(params.scalerlist));
 
-    //Collect all files from unpack, separate scalers from normal files
+    // Collect all files from unpack, separate scalers from normal files
     let mut files: Vec<CompassFile<'_>> = vec![];
     let mut total_count: u64 = 0;
     for item in params.unpack_dir_path.read_dir()? {
@@ -101,7 +89,7 @@ fn process_run(
     }
 
     let mut evb = EventBuilder::new(&params.coincidence_window);
-    let mut analyzed_data = ChannelData::default();
+    let mut analyzed_data = ChannelData::new(params.channel_map);
     let x_weights = calculate_weights(k_params, params.nuc_map);
 
     let mut earliest_file_index: Option<usize>;
@@ -114,7 +102,7 @@ fn process_run(
     let mut frag_number = 0;
 
     loop {
-        //Bulk of the work ... look for the earliest hit in the file collection
+        // Bulk of the work ... look for the earliest hit in the file collection
         earliest_file_index = Option::None;
         for i in 0..files.len() {
             if !files[i].is_eof() {
@@ -137,9 +125,9 @@ fn process_run(
         }
 
         match earliest_file_index {
-            None => break, //This is how we exit, no more hits to be found
+            None => break, // This is how we exit, no more hits to be found
             Some(i) => {
-                //else we pop the earliest hit off to the event builder
+                // else we pop the earliest hit off to the event builder
                 let hit = files[i].get_top_hit()?;
                 evb.push_hit(hit);
                 files[i].set_hit_used();
@@ -148,7 +136,7 @@ fn process_run(
 
         if evb.is_event_ready() {
             analyzed_data.append_event(evb.get_ready_event(), params.channel_map, x_weights);
-            //Check to see if we need to fragment
+            // Check to see if we need to fragment
             if analyzed_data.get_used_size() > MAX_USED_SIZE {
                 write_dataframe_fragment(
                     analyzed_data,
@@ -156,13 +144,13 @@ fn process_run(
                     &params.run_number,
                     &frag_number,
                 )?;
-                //allocate new vector
-                analyzed_data = ChannelData::default();
+                // Allocate new vector
+                analyzed_data = ChannelData::new(params.channel_map);
                 frag_number += 1;
             }
         }
 
-        //Progress report
+        // Progress report
         count += 1;
         if count == flush_val {
             flush_count += 1;
@@ -189,11 +177,22 @@ fn process_run(
         list.write_scalers(&params.scalerout_file_path)?
     }
 
-    //To be safe, manually drop all files in unpack dir before deleting all the files
+    // To be safe, manually drop all files in unpack dir before deleting all the files
     drop(files);
 
     clean_up_unpack_dir(&params.unpack_dir_path)?;
 
+    Ok(())
+}
+
+fn write_dataframe_fragment(
+    data: ChannelData,
+    out_dir: &Path,
+    run_number: &i32,
+    frag_number: &i32,
+) -> Result<(), PolarsError> {
+    let frag_file_path = out_dir.join(format!("run_{}_{}.parquet", run_number, frag_number));
+    write_dataframe(data, &frag_file_path)?;
     Ok(())
 }
 

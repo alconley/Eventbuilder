@@ -14,7 +14,7 @@ impl EVBApp {
 impl App for EVBApp {
     fn update(&mut self, ctx: &eframe::egui::Context, _frame: &mut eframe::Frame) {
         if self.window {
-            egui::Window::new("CeBrA - SE-SPS Event Builder")
+            egui::Window::new("Event Builder")
                 .min_width(200.0)
                 .max_width(600.0)
                 .show(ctx, |ui| {
