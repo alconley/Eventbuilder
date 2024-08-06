@@ -211,7 +211,7 @@ impl EVBApp {
             ui.label("Number of Boards:");
             let mut desired_board_count = self.parameters.channel_map_entries.len();
             if ui
-                .add(egui::DragValue::new(&mut desired_board_count).clamp_range(0..=16))
+                .add(egui::DragValue::new(&mut desired_board_count).range(0..=16))
                 .changed()
             {
                 self.parameters

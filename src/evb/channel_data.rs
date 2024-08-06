@@ -75,6 +75,16 @@ pub enum ChannelDataField {
     Cebra6Time,
     Cebra7Time,
     Cebra8Time,
+
+    Cebra0RelTime,
+    Cebra1RelTime,
+    Cebra2RelTime,
+    Cebra3RelTime,
+    Cebra4RelTime,
+    Cebra5RelTime,
+    Cebra6RelTime,
+    Cebra7RelTime,
+    Cebra8RelTime,
 }
 
 impl ChannelDataField {
@@ -89,7 +99,6 @@ impl ChannelDataField {
             && channel_map.contains_channel_type(ChannelType::DelayFrontRight)
             && channel_map.contains_channel_type(ChannelType::DelayBackLeft)
             && channel_map.contains_channel_type(ChannelType::DelayBackRight);
-
         ChannelDataField::iter()
             .filter(|field| {
                 match field {
@@ -144,50 +153,90 @@ impl ChannelDataField {
                     | ChannelDataField::DelayBackRightTime => {
                         channel_map.contains_channel_type(ChannelType::DelayBackRight)
                     }
+
                     ChannelDataField::Cebra0Energy
                     | ChannelDataField::Cebra0Short
                     | ChannelDataField::Cebra0Time => {
                         channel_map.contains_channel_type(ChannelType::Cebra0)
                     }
+                    ChannelDataField::Cebra0RelTime => {
+                        channel_map.contains_channel_type(ChannelType::Cebra0)
+                            && channel_map.contains_channel_type(ChannelType::ScintLeft)
+                    }
+
                     ChannelDataField::Cebra1Energy
                     | ChannelDataField::Cebra1Short
                     | ChannelDataField::Cebra1Time => {
                         channel_map.contains_channel_type(ChannelType::Cebra1)
                     }
+                    ChannelDataField::Cebra1RelTime => {
+                        channel_map.contains_channel_type(ChannelType::Cebra1)
+                            && channel_map.contains_channel_type(ChannelType::ScintLeft)
+                    }
+
                     ChannelDataField::Cebra2Energy
                     | ChannelDataField::Cebra2Short
                     | ChannelDataField::Cebra2Time => {
                         channel_map.contains_channel_type(ChannelType::Cebra2)
                     }
+                    ChannelDataField::Cebra2RelTime => {
+                        channel_map.contains_channel_type(ChannelType::Cebra2)
+                            && channel_map.contains_channel_type(ChannelType::ScintLeft)
+                    }
+
                     ChannelDataField::Cebra3Energy
                     | ChannelDataField::Cebra3Short
                     | ChannelDataField::Cebra3Time => {
                         channel_map.contains_channel_type(ChannelType::Cebra3)
+                    }
+                    ChannelDataField::Cebra3RelTime => {
+                        channel_map.contains_channel_type(ChannelType::Cebra3)
+                            && channel_map.contains_channel_type(ChannelType::ScintLeft)
                     }
                     ChannelDataField::Cebra4Energy
                     | ChannelDataField::Cebra4Short
                     | ChannelDataField::Cebra4Time => {
                         channel_map.contains_channel_type(ChannelType::Cebra4)
                     }
+                    ChannelDataField::Cebra4RelTime => {
+                        channel_map.contains_channel_type(ChannelType::Cebra4)
+                            && channel_map.contains_channel_type(ChannelType::ScintLeft)
+                    }
                     ChannelDataField::Cebra5Energy
                     | ChannelDataField::Cebra5Short
                     | ChannelDataField::Cebra5Time => {
                         channel_map.contains_channel_type(ChannelType::Cebra5)
+                    }
+                    ChannelDataField::Cebra5RelTime => {
+                        channel_map.contains_channel_type(ChannelType::Cebra5)
+                            && channel_map.contains_channel_type(ChannelType::ScintLeft)
                     }
                     ChannelDataField::Cebra6Energy
                     | ChannelDataField::Cebra6Short
                     | ChannelDataField::Cebra6Time => {
                         channel_map.contains_channel_type(ChannelType::Cebra6)
                     }
+                    ChannelDataField::Cebra6RelTime => {
+                        channel_map.contains_channel_type(ChannelType::Cebra6)
+                            && channel_map.contains_channel_type(ChannelType::ScintLeft)
+                    }
                     ChannelDataField::Cebra7Energy
                     | ChannelDataField::Cebra7Short
                     | ChannelDataField::Cebra7Time => {
                         channel_map.contains_channel_type(ChannelType::Cebra7)
                     }
+                    ChannelDataField::Cebra7RelTime => {
+                        channel_map.contains_channel_type(ChannelType::Cebra7)
+                            && channel_map.contains_channel_type(ChannelType::ScintLeft)
+                    }
                     ChannelDataField::Cebra8Energy
                     | ChannelDataField::Cebra8Short
                     | ChannelDataField::Cebra8Time => {
                         channel_map.contains_channel_type(ChannelType::Cebra8)
+                    }
+                    ChannelDataField::Cebra8RelTime => {
+                        channel_map.contains_channel_type(ChannelType::Cebra8)
+                            && channel_map.contains_channel_type(ChannelType::ScintLeft)
                     }
                 }
             })
@@ -274,6 +323,18 @@ impl ChannelData {
         let mut dbl_time = INVALID_VALUE;
         let mut dbr_time = INVALID_VALUE;
 
+        // for cebra relative time
+        let mut scint_left_time = INVALID_VALUE;
+        let mut cebra0_time = INVALID_VALUE;
+        let mut cebra1_time = INVALID_VALUE;
+        let mut cebra2_time = INVALID_VALUE;
+        let mut cebra3_time = INVALID_VALUE;
+        let mut cebra4_time = INVALID_VALUE;
+        let mut cebra5_time = INVALID_VALUE;
+        let mut cebra6_time = INVALID_VALUE;
+        let mut cebra7_time = INVALID_VALUE;
+        let mut cebra8_time = INVALID_VALUE;
+
         for hit in event.iter() {
             //Fill out detector fields using channel map
             let channel_data = match map.get_channel_data(&hit.uuid) {
@@ -285,6 +346,7 @@ impl ChannelData {
                     self.set_value(&ChannelDataField::ScintLeftEnergy, hit.energy);
                     self.set_value(&ChannelDataField::ScintLeftShort, hit.energy_short);
                     self.set_value(&ChannelDataField::ScintLeftTime, hit.timestamp);
+                    scint_left_time = hit.timestamp;
                 }
 
                 ChannelType::ScintRight => {
@@ -343,54 +405,63 @@ impl ChannelData {
                     self.set_value(&ChannelDataField::Cebra0Energy, hit.energy);
                     self.set_value(&ChannelDataField::Cebra0Short, hit.energy_short);
                     self.set_value(&ChannelDataField::Cebra0Time, hit.timestamp);
+                    cebra0_time = hit.timestamp;
                 }
 
                 ChannelType::Cebra1 => {
                     self.set_value(&ChannelDataField::Cebra1Energy, hit.energy);
                     self.set_value(&ChannelDataField::Cebra1Short, hit.energy_short);
                     self.set_value(&ChannelDataField::Cebra1Time, hit.timestamp);
+                    cebra1_time = hit.timestamp;
                 }
 
                 ChannelType::Cebra2 => {
                     self.set_value(&ChannelDataField::Cebra2Energy, hit.energy);
                     self.set_value(&ChannelDataField::Cebra2Short, hit.energy_short);
                     self.set_value(&ChannelDataField::Cebra2Time, hit.timestamp);
+                    cebra2_time = hit.timestamp;
                 }
 
                 ChannelType::Cebra3 => {
                     self.set_value(&ChannelDataField::Cebra3Energy, hit.energy);
                     self.set_value(&ChannelDataField::Cebra3Short, hit.energy_short);
                     self.set_value(&ChannelDataField::Cebra3Time, hit.timestamp);
+                    cebra3_time = hit.timestamp;
                 }
 
                 ChannelType::Cebra4 => {
                     self.set_value(&ChannelDataField::Cebra4Energy, hit.energy);
                     self.set_value(&ChannelDataField::Cebra4Short, hit.energy_short);
                     self.set_value(&ChannelDataField::Cebra4Time, hit.timestamp);
+                    cebra4_time = hit.timestamp;
                 }
 
                 ChannelType::Cebra5 => {
                     self.set_value(&ChannelDataField::Cebra5Energy, hit.energy);
                     self.set_value(&ChannelDataField::Cebra5Short, hit.energy_short);
                     self.set_value(&ChannelDataField::Cebra5Time, hit.timestamp);
+                    cebra5_time = hit.timestamp;
                 }
 
                 ChannelType::Cebra6 => {
                     self.set_value(&ChannelDataField::Cebra6Energy, hit.energy);
                     self.set_value(&ChannelDataField::Cebra6Short, hit.energy_short);
                     self.set_value(&ChannelDataField::Cebra6Time, hit.timestamp);
+                    cebra6_time = hit.timestamp;
                 }
 
                 ChannelType::Cebra7 => {
                     self.set_value(&ChannelDataField::Cebra7Energy, hit.energy);
                     self.set_value(&ChannelDataField::Cebra7Short, hit.energy_short);
                     self.set_value(&ChannelDataField::Cebra7Time, hit.timestamp);
+                    cebra7_time = hit.timestamp;
                 }
 
                 ChannelType::Cebra8 => {
                     self.set_value(&ChannelDataField::Cebra8Energy, hit.energy);
                     self.set_value(&ChannelDataField::Cebra8Short, hit.energy_short);
                     self.set_value(&ChannelDataField::Cebra8Time, hit.timestamp);
+                    cebra8_time = hit.timestamp;
                 }
 
                 _ => continue,
@@ -425,6 +496,61 @@ impl ChannelData {
                 Some(w) => self.set_value(&ChannelDataField::Xavg, w.0 * x1 + w.1 * x2),
                 None => self.set_value(&ChannelDataField::Xavg, INVALID_VALUE),
             };
+        }
+
+        if scint_left_time != INVALID_VALUE && cebra0_time != INVALID_VALUE {
+            self.set_value(
+                &ChannelDataField::Cebra0RelTime,
+                cebra0_time - scint_left_time,
+            );
+        }
+        if scint_left_time != INVALID_VALUE && cebra1_time != INVALID_VALUE {
+            self.set_value(
+                &ChannelDataField::Cebra1RelTime,
+                cebra1_time - scint_left_time,
+            );
+        }
+        if scint_left_time != INVALID_VALUE && cebra2_time != INVALID_VALUE {
+            self.set_value(
+                &ChannelDataField::Cebra2RelTime,
+                cebra2_time - scint_left_time,
+            );
+        }
+        if scint_left_time != INVALID_VALUE && cebra3_time != INVALID_VALUE {
+            self.set_value(
+                &ChannelDataField::Cebra3RelTime,
+                cebra3_time - scint_left_time,
+            );
+        }
+        if scint_left_time != INVALID_VALUE && cebra4_time != INVALID_VALUE {
+            self.set_value(
+                &ChannelDataField::Cebra4RelTime,
+                cebra4_time - scint_left_time,
+            );
+        }
+        if scint_left_time != INVALID_VALUE && cebra5_time != INVALID_VALUE {
+            self.set_value(
+                &ChannelDataField::Cebra5RelTime,
+                cebra5_time - scint_left_time,
+            );
+        }
+        if scint_left_time != INVALID_VALUE && cebra6_time != INVALID_VALUE {
+            self.set_value(
+                &ChannelDataField::Cebra6RelTime,
+                cebra6_time - scint_left_time,
+            );
+        }
+        if scint_left_time != INVALID_VALUE && cebra7_time != INVALID_VALUE {
+            self.set_value(
+                &ChannelDataField::Cebra7RelTime,
+                cebra7_time - scint_left_time,
+            );
+        }
+        if scint_left_time != INVALID_VALUE && cebra8_time != INVALID_VALUE {
+            self.set_value(
+                &ChannelDataField::Cebra8RelTime,
+                cebra8_time - scint_left_time,
+            );
         }
     }
 
