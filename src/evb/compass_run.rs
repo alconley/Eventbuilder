@@ -173,7 +173,10 @@ fn process_run(
             &params.run_number,
             &frag_number,
         )?;
-        println!("Writing run {} with {} fragments", params.run_number, frag_number);
+        println!(
+            "Writing run {} with {} fragments",
+            params.run_number, frag_number
+        );
     }
     if let Some(list) = scaler_list {
         list.write_scalers(&params.scalerout_file_path)?
@@ -220,6 +223,7 @@ pub fn process_runs(
     let mass_map = MassMap::new()?;
     let shift_map = ShiftMap::new(params.shift_map);
 
+    println!("Processing runs {} to {}", params.run_min, params.run_max);
     for run in params.run_min..params.run_max {
         let local_params = RunParams {
             run_archive_path: params.archive_dir.join(format!("run_{}.tar.gz", run)),
@@ -244,6 +248,8 @@ pub fn process_runs(
             process_run(local_params, &k_params, progress.clone())?;
         }
     }
+
+    println!("Processing complete");
 
     Ok(())
 }
