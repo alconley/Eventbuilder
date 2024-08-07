@@ -165,6 +165,7 @@ fn process_run(
 
     if frag_number == 0 {
         write_dataframe(analyzed_data, &params.output_file_path)?;
+        println!("Writing run {}", params.run_number);
     } else {
         write_dataframe_fragment(
             analyzed_data,
@@ -172,6 +173,7 @@ fn process_run(
             &params.run_number,
             &frag_number,
         )?;
+        println!("Writing run {} with {} fragments", params.run_number, frag_number);
     }
     if let Some(list) = scaler_list {
         list.write_scalers(&params.scalerout_file_path)?

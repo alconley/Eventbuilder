@@ -1,4 +1,5 @@
 use super::nuclear_data::MassMap;
+use log::info;
 use serde::{Deserialize, Serialize};
 
 const C: f64 = 2.99792458e8; //speed of light in m/s
@@ -77,7 +78,7 @@ fn calculate_z_offset(params: &KineParameters, nuc_map: &MassMap) -> Option<f64>
         None => return None,
     };
 
-    println!("Target: {:?}", target);
+    info!("Target: {:?}", target);
     let projectile = match nuc_map.get_data(&params.projectile_z, &params.projectile_a) {
         Some(data) => data,
         None => return None,
