@@ -41,6 +41,9 @@ pub enum ChannelDataField {
     DelayBackRightEnergy,
     DelayBackRightShort,
     DelayBackRightTime,
+    MonitorEnergy,
+    MonitorShort,
+    MonitorTime,
     X1,
     X2,
     Xavg,
@@ -152,6 +155,11 @@ impl ChannelDataField {
                     | ChannelDataField::DelayBackRightShort
                     | ChannelDataField::DelayBackRightTime => {
                         channel_map.contains_channel_type(ChannelType::DelayBackRight)
+                    }
+                    ChannelDataField::MonitorEnergy
+                    | ChannelDataField::MonitorShort
+                    | ChannelDataField::MonitorTime => {
+                        channel_map.contains_channel_type(ChannelType::Monitor)
                     }
 
                     ChannelDataField::Cebra0Energy

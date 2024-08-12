@@ -291,6 +291,11 @@ impl EVBApp {
                                                 );
                                                 ui.selectable_value(
                                                     channel_type,
+                                                    ChannelType::Monitor,
+                                                    "Monitor",
+                                                );
+                                                ui.selectable_value(
+                                                    channel_type,
                                                     ChannelType::DelayBackRight,
                                                     "DelayBackRight",
                                                 );

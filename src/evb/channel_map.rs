@@ -18,6 +18,7 @@ pub enum ChannelType {
     DelayFrontRight,
     DelayBackLeft,
     DelayBackRight,
+    Monitor,
     Cebra0,
     Cebra1,
     Cebra2,
