@@ -56,8 +56,7 @@ pub struct CompassData {
 impl CompassData {
     pub fn new(raw: &RawCompassData, shifts: &Option<ShiftMap>) -> Self {
         let mut rng = rand::thread_rng();
-        // let board = raw.board as u32;
-        let board = 0;
+        let board = raw.board as u32;
         let channel = raw.channel as u32;
         let id = generate_board_channel_uuid(&board, &channel);
         log::debug!("Board: {}, Channel: {}, UUID: {}", board, channel, id);

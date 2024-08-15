@@ -43,12 +43,14 @@ impl ChannelType {
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Board {
+    pub id: u32,                     // Board ID
     pub channels: [ChannelType; 16], // Each board has 16 channels
 }
 
 impl Default for Board {
     fn default() -> Self {
         Board {
+            id: 0,                                  // Default board ID
             channels: [ChannelType::default(); 16], // Initialize all channels with the default type
         }
     }
@@ -114,14 +116,14 @@ impl ChannelMap {
         let mut cmap = ChannelMap {
             map: HashMap::new(),
         };
-        for (board_index, board) in boards.iter().enumerate() {
+        for board in boards.iter() {
             for (channel_index, channel) in board.channels.iter().enumerate() {
                 let data = ChannelData {
                     channel_type: *channel,
                 };
 
                 cmap.map.insert(
-                    generate_board_channel_uuid(&(board_index as u32), &(channel_index as u32)),
+                    generate_board_channel_uuid(&(board.id), &(channel_index as u32)),
                     data,
                 );
             }

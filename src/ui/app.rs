@@ -235,8 +235,10 @@ impl EVBApp {
                                 .num_columns(2)
                                 .spacing([20.0, 4.0])
                                 .show(ui, |ui| {
-                                    ui.label(format!("Board {}", board_idx));
-                                    ui.label("Channel Number");
+                                    ui.add(egui::DragValue::new(&mut board.id).prefix("Board ID: ")).on_hover_text("If data is from CoMPASS, the board id will start at 0 and increment by 1 for each board.\nIf the data is converted from FSUDAQ to CAEN format, the board id is the id on the digitzer.");
+                                    ui.end_row();
+                                    ui.label("#");
+                                    ui.label("Type");
                                     ui.end_row();
 
                                     for (channel_idx, channel_type) in
