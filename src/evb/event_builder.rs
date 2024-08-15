@@ -23,6 +23,7 @@ impl EventBuilder {
     }
 
     pub fn push_hit(&mut self, hit: &CompassData) {
+        // log::debug!("EventBuilder::push_hit: {:?}", hit);
         if self.event.is_empty() {
             self.event.push(hit.clone());
             return;
