@@ -165,7 +165,7 @@ fn process_run(
 
     if frag_number == 0 {
         write_dataframe(analyzed_data, &params.output_file_path)?;
-        println!("Writing run {}", params.run_number);
+        println!("\tWriting run {}", params.run_number);
     } else {
         write_dataframe_fragment(
             analyzed_data,
@@ -174,7 +174,7 @@ fn process_run(
             &frag_number,
         )?;
         println!(
-            "Writing run {} with {} fragments",
+            "\tWriting run {} with {} fragments",
             params.run_number, frag_number
         );
     }
@@ -223,7 +223,11 @@ pub fn process_runs(
     let mass_map = MassMap::new()?;
     let shift_map = ShiftMap::new(params.shift_map);
 
-    println!("Processing runs {} to {}", params.run_min, params.run_max);
+    println!(
+        "Processing runs {} to {}",
+        params.run_min,
+        params.run_max - 1
+    );
     for run in params.run_min..params.run_max {
         let local_params = RunParams {
             run_archive_path: params.archive_dir.join(format!("run_{}.tar.gz", run)),
@@ -249,7 +253,7 @@ pub fn process_runs(
         }
     }
 
-    println!("Processing complete");
+    println!("Processing complete\n");
 
     Ok(())
 }

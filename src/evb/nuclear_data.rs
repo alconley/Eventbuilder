@@ -99,6 +99,10 @@ impl MassMap {
         Ok(map)
     }
 
+    pub fn is_empty(&self) -> bool {
+        self.map.is_empty()
+    }
+
     fn init(&mut self) -> Result<(), MassError> {
         let file = std::fs::File::open(&self.file)?;
         let mut reader = std::io::BufReader::new(file);

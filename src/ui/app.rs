@@ -80,7 +80,11 @@ pub struct EVBApp {
 }
 
 impl EVBApp {
-    pub fn new(_cc: &eframe::CreationContext<'_>, window: bool) -> Self {
+    pub fn new(cc: &eframe::CreationContext<'_>, window: bool) -> Self {
+        if let Some(storage) = cc.storage {
+            return eframe::get_value(storage, eframe::APP_KEY).unwrap_or_default();
+        }
+
         #[cfg(not(target_arch = "wasm32"))]
         EVBApp {
             progress: Arc::new(Mutex::new(0.0)),
@@ -505,6 +509,15 @@ impl EVBApp {
             if ui.button("Set Kinematics").clicked() {
                 self.rxn_eqn = self.parameters.kinematics.generate_rxn_eqn(&self.mass_map);
             }
+
+            // if mass map is empty, load it
+            // need this for persistence to work with the mass map for the set kinematics button
+            if self.mass_map.is_empty() {
+                match MassMap::new() {
+                    Ok(mass_map) => self.mass_map = mass_map,
+                    Err(e) => error!("Error loading mass map: {}", e),
+                }
+            }
         });
     }
 
@@ -681,6 +694,11 @@ impl EVBApp {
 }
 
 impl App for EVBApp {
+    /// Called by the frame work to save state before shutdown.
+    fn save(&mut self, storage: &mut dyn eframe::Storage) {
+        eframe::set_value(storage, eframe::APP_KEY, self);
+    }
+
     #[cfg(not(target_arch = "wasm32"))]
     fn update(&mut self, ctx: &eframe::egui::Context, _frame: &mut eframe::Frame) {
         if self.window {
