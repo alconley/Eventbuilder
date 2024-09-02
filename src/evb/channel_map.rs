@@ -28,6 +28,10 @@ pub enum ChannelType {
     Cebra6,
     Cebra7,
     Cebra8,
+    PIPS1000,
+    PIPS500,
+    PIPS300,
+    PIPS100,
 
     // make sure to update app.rs so the channel map combo box are updated
 

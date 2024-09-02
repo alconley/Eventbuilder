@@ -88,6 +88,21 @@ pub enum ChannelDataField {
     Cebra6RelTime,
     Cebra7RelTime,
     Cebra8RelTime,
+
+    PIPS1000Energy,
+    PIPS500Energy,
+    PIPS300Energy,
+    PIPS100Energy,
+
+    PIPS1000Short,
+    PIPS500Short,
+    PIPS300Short,
+    PIPS100Short,
+
+    PIPS1000Time,
+    PIPS500Time,
+    PIPS300Time,
+    PIPS100Time,
 }
 
 impl ChannelDataField {
@@ -245,6 +260,30 @@ impl ChannelDataField {
                     ChannelDataField::Cebra8RelTime => {
                         channel_map.contains_channel_type(ChannelType::Cebra8)
                             && channel_map.contains_channel_type(ChannelType::ScintLeft)
+                    }
+
+                    ChannelDataField::PIPS1000Energy
+                    | ChannelDataField::PIPS1000Short
+                    | ChannelDataField::PIPS1000Time => {
+                        channel_map.contains_channel_type(ChannelType::PIPS1000)
+                    }
+
+                    ChannelDataField::PIPS500Energy
+                    | ChannelDataField::PIPS500Short
+                    | ChannelDataField::PIPS500Time => {
+                        channel_map.contains_channel_type(ChannelType::PIPS500)
+                    }
+
+                    ChannelDataField::PIPS300Energy
+                    | ChannelDataField::PIPS300Short
+                    | ChannelDataField::PIPS300Time => {
+                        channel_map.contains_channel_type(ChannelType::PIPS300)
+                    }
+
+                    ChannelDataField::PIPS100Energy
+                    | ChannelDataField::PIPS100Short
+                    | ChannelDataField::PIPS100Time => {
+                        channel_map.contains_channel_type(ChannelType::PIPS100)
                     }
                 }
             })
@@ -472,6 +511,29 @@ impl ChannelData {
                     cebra8_time = hit.timestamp;
                 }
 
+                ChannelType::PIPS1000 => {
+                    self.set_value(&ChannelDataField::PIPS1000Energy, hit.energy);
+                    self.set_value(&ChannelDataField::PIPS1000Short, hit.energy_short);
+                    self.set_value(&ChannelDataField::PIPS1000Time, hit.timestamp);
+                }
+
+                ChannelType::PIPS500 => {
+                    self.set_value(&ChannelDataField::PIPS500Energy, hit.energy);
+                    self.set_value(&ChannelDataField::PIPS500Short, hit.energy_short);
+                    self.set_value(&ChannelDataField::PIPS500Time, hit.timestamp);
+                }
+
+                ChannelType::PIPS300 => {
+                    self.set_value(&ChannelDataField::PIPS300Energy, hit.energy);
+                    self.set_value(&ChannelDataField::PIPS300Short, hit.energy_short);
+                    self.set_value(&ChannelDataField::PIPS300Time, hit.timestamp);
+                }
+
+                ChannelType::PIPS100 => {
+                    self.set_value(&ChannelDataField::PIPS100Energy, hit.energy);
+                    self.set_value(&ChannelDataField::PIPS100Short, hit.energy_short);
+                    self.set_value(&ChannelDataField::PIPS100Time, hit.timestamp);
+                }
                 _ => continue,
             }
         }
@@ -506,59 +568,69 @@ impl ChannelData {
             };
         }
 
-        if scint_left_time != INVALID_VALUE && cebra0_time != INVALID_VALUE {
-            self.set_value(
-                &ChannelDataField::Cebra0RelTime,
-                cebra0_time - scint_left_time,
-            );
-        }
-        if scint_left_time != INVALID_VALUE && cebra1_time != INVALID_VALUE {
-            self.set_value(
-                &ChannelDataField::Cebra1RelTime,
-                cebra1_time - scint_left_time,
-            );
-        }
-        if scint_left_time != INVALID_VALUE && cebra2_time != INVALID_VALUE {
-            self.set_value(
-                &ChannelDataField::Cebra2RelTime,
-                cebra2_time - scint_left_time,
-            );
-        }
-        if scint_left_time != INVALID_VALUE && cebra3_time != INVALID_VALUE {
-            self.set_value(
-                &ChannelDataField::Cebra3RelTime,
-                cebra3_time - scint_left_time,
-            );
-        }
-        if scint_left_time != INVALID_VALUE && cebra4_time != INVALID_VALUE {
-            self.set_value(
-                &ChannelDataField::Cebra4RelTime,
-                cebra4_time - scint_left_time,
-            );
-        }
-        if scint_left_time != INVALID_VALUE && cebra5_time != INVALID_VALUE {
-            self.set_value(
-                &ChannelDataField::Cebra5RelTime,
-                cebra5_time - scint_left_time,
-            );
-        }
-        if scint_left_time != INVALID_VALUE && cebra6_time != INVALID_VALUE {
-            self.set_value(
-                &ChannelDataField::Cebra6RelTime,
-                cebra6_time - scint_left_time,
-            );
-        }
-        if scint_left_time != INVALID_VALUE && cebra7_time != INVALID_VALUE {
-            self.set_value(
-                &ChannelDataField::Cebra7RelTime,
-                cebra7_time - scint_left_time,
-            );
-        }
-        if scint_left_time != INVALID_VALUE && cebra8_time != INVALID_VALUE {
-            self.set_value(
-                &ChannelDataField::Cebra8RelTime,
-                cebra8_time - scint_left_time,
-            );
+        if scint_left_time != INVALID_VALUE {
+            if cebra0_time != INVALID_VALUE {
+                self.set_value(
+                    &ChannelDataField::Cebra0RelTime,
+                    cebra0_time - scint_left_time,
+                );
+            }
+
+            if cebra1_time != INVALID_VALUE {
+                self.set_value(
+                    &ChannelDataField::Cebra1RelTime,
+                    cebra1_time - scint_left_time,
+                );
+            }
+
+            if cebra2_time != INVALID_VALUE {
+                self.set_value(
+                    &ChannelDataField::Cebra2RelTime,
+                    cebra2_time - scint_left_time,
+                );
+            }
+
+            if cebra3_time != INVALID_VALUE {
+                self.set_value(
+                    &ChannelDataField::Cebra3RelTime,
+                    cebra3_time - scint_left_time,
+                );
+            }
+
+            if cebra4_time != INVALID_VALUE {
+                self.set_value(
+                    &ChannelDataField::Cebra4RelTime,
+                    cebra4_time - scint_left_time,
+                );
+            }
+
+            if cebra5_time != INVALID_VALUE {
+                self.set_value(
+                    &ChannelDataField::Cebra5RelTime,
+                    cebra5_time - scint_left_time,
+                );
+            }
+
+            if cebra6_time != INVALID_VALUE {
+                self.set_value(
+                    &ChannelDataField::Cebra6RelTime,
+                    cebra6_time - scint_left_time,
+                );
+            }
+
+            if cebra7_time != INVALID_VALUE {
+                self.set_value(
+                    &ChannelDataField::Cebra7RelTime,
+                    cebra7_time - scint_left_time,
+                );
+            }
+
+            if cebra8_time != INVALID_VALUE {
+                self.set_value(
+                    &ChannelDataField::Cebra8RelTime,
+                    cebra8_time - scint_left_time,
+                );
+            }
         }
     }
 

@@ -352,6 +352,26 @@ impl EVBApp {
                                                 );
                                                 ui.selectable_value(
                                                     channel_type,
+                                                    ChannelType::PIPS1000,
+                                                    "PIPS1000",
+                                                );
+                                                ui.selectable_value(
+                                                    channel_type,
+                                                    ChannelType::PIPS500,
+                                                    "PIPS500",
+                                                );
+                                                ui.selectable_value(
+                                                    channel_type,
+                                                    ChannelType::PIPS300,
+                                                    "PIPS300",
+                                                );
+                                                ui.selectable_value(
+                                                    channel_type,
+                                                    ChannelType::PIPS100,
+                                                    "PIPS100",
+                                                );
+                                                ui.selectable_value(
+                                                    channel_type,
                                                     ChannelType::None,
                                                     "None",
                                                 );
