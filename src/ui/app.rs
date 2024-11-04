@@ -372,6 +372,21 @@ impl EVBApp {
                                                 );
                                                 ui.selectable_value(
                                                     channel_type,
+                                                    ChannelType::CATRINA0,
+                                                    "CATRINA0",
+                                                );
+                                                ui.selectable_value(
+                                                    channel_type,
+                                                    ChannelType::CATRINA1,
+                                                    "CATRINA1",
+                                                );
+                                                ui.selectable_value(
+                                                    channel_type,
+                                                    ChannelType::CATRINA2,
+                                                    "CATRINA2",
+                                                );
+                                                ui.selectable_value(
+                                                    channel_type,
                                                     ChannelType::None,
                                                     "None",
                                                 );

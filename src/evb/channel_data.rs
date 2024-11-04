@@ -103,6 +103,22 @@ pub enum ChannelDataField {
     PIPS500Time,
     PIPS300Time,
     PIPS100Time,
+
+    CATRINA0Energy,
+    CATRINA1Energy,
+    CATRINA2Energy,
+
+    CATRINA0Short,
+    CATRINA1Short,
+    CATRINA2Short,
+
+    CATRINA0Time,
+    CATRINA1Time,
+    CATRINA2Time,
+
+    CATRINA0PSD,
+    CATRINA1PSD,
+    CATRINA2PSD,
 }
 
 impl ChannelDataField {
@@ -284,6 +300,27 @@ impl ChannelDataField {
                     | ChannelDataField::PIPS100Short
                     | ChannelDataField::PIPS100Time => {
                         channel_map.contains_channel_type(ChannelType::PIPS100)
+                    }
+
+                    ChannelDataField::CATRINA0Energy
+                    | ChannelDataField::CATRINA0Short
+                    | ChannelDataField::CATRINA0Time
+                    | ChannelDataField::CATRINA0PSD => {
+                        channel_map.contains_channel_type(ChannelType::CATRINA0)
+                    }
+
+                    ChannelDataField::CATRINA1Energy
+                    | ChannelDataField::CATRINA1Short
+                    | ChannelDataField::CATRINA1Time
+                    | ChannelDataField::CATRINA1PSD => {
+                        channel_map.contains_channel_type(ChannelType::CATRINA1)
+                    }
+
+                    ChannelDataField::CATRINA2Energy
+                    | ChannelDataField::CATRINA2Short
+                    | ChannelDataField::CATRINA2Time
+                    | ChannelDataField::CATRINA2PSD => {
+                        channel_map.contains_channel_type(ChannelType::CATRINA2)
                     }
                 }
             })
@@ -533,6 +570,36 @@ impl ChannelData {
                     self.set_value(&ChannelDataField::PIPS100Energy, hit.energy);
                     self.set_value(&ChannelDataField::PIPS100Short, hit.energy_short);
                     self.set_value(&ChannelDataField::PIPS100Time, hit.timestamp);
+                }
+
+                ChannelType::CATRINA0 => {
+                    self.set_value(&ChannelDataField::CATRINA0Energy, hit.energy);
+                    self.set_value(&ChannelDataField::CATRINA0Short, hit.energy_short);
+                    self.set_value(&ChannelDataField::CATRINA0Time, hit.timestamp);
+                    let long = hit.energy;
+                    let short = hit.energy_short;
+                    let psd = (long - short) / long;
+                    self.set_value(&ChannelDataField::CATRINA0PSD, psd);
+                }
+
+                ChannelType::CATRINA1 => {
+                    self.set_value(&ChannelDataField::CATRINA1Energy, hit.energy);
+                    self.set_value(&ChannelDataField::CATRINA1Short, hit.energy_short);
+                    self.set_value(&ChannelDataField::CATRINA1Time, hit.timestamp);
+                    let long = hit.energy;
+                    let short = hit.energy_short;
+                    let psd = (long - short) / long;
+                    self.set_value(&ChannelDataField::CATRINA1PSD, psd);
+                }
+
+                ChannelType::CATRINA2 => {
+                    self.set_value(&ChannelDataField::CATRINA2Energy, hit.energy);
+                    self.set_value(&ChannelDataField::CATRINA2Short, hit.energy_short);
+                    self.set_value(&ChannelDataField::CATRINA2Time, hit.timestamp);
+                    let long = hit.energy;
+                    let short = hit.energy_short;
+                    let psd = (long - short) / long;
+                    self.set_value(&ChannelDataField::CATRINA2PSD, psd);
                 }
                 _ => continue,
             }
