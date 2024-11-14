@@ -231,6 +231,20 @@ impl EVBApp {
                 {
                     ui.vertical(|ui| {
                         ui.group(|ui| {
+
+                            ui.horizontal(|ui| {
+                                if ui.button("SE-SPS").clicked() {
+                                    *board = Board::sps(board_idx as u32);
+                                }
+
+                                ui.separator();
+                                if ui.button("Clear").clicked() {
+                                    for channel in board.channels.iter_mut() {
+                                        *channel = ChannelType::None;
+                                    }
+                                }
+                            });
+
                             egui::Grid::new(format!("board_{}", board_idx))
                                 .num_columns(2)
                                 .spacing([20.0, 4.0])

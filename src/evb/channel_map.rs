@@ -66,6 +66,30 @@ impl Default for Board {
     }
 }
 
+impl Board {
+    pub fn sps(id: u32) -> Board {
+        let channels = [
+            ChannelType::ScintRight,
+            ChannelType::ScintLeft,
+            ChannelType::None,
+            ChannelType::None,
+            ChannelType::None,
+            ChannelType::None,
+            ChannelType::None,
+            ChannelType::Cathode,
+            ChannelType::DelayFrontLeft,
+            ChannelType::DelayFrontRight,
+            ChannelType::DelayBackLeft,
+            ChannelType::DelayBackRight,
+            ChannelType::None,
+            ChannelType::AnodeFront,
+            ChannelType::None,
+            ChannelType::AnodeBack,
+        ];
+        Board { id, channels }
+    }
+}
+
 #[derive(Debug)]
 pub enum ChannelMapError {
     IOError(std::io::Error),
