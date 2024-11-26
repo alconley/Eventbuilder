@@ -12,6 +12,24 @@ pub struct ShiftMapEntry {
     pub time_shift: f64, // Assuming time shift is a floating-point number; adjust the type as needed
 }
 
+impl ShiftMapEntry {
+    pub fn ui(&mut self, ui: &mut egui::Ui, on_remove: impl FnOnce()) {
+        ui.horizontal(|ui| {
+            ui.add(egui::DragValue::new(&mut self.board_number).prefix("Board: "));
+            ui.add(egui::DragValue::new(&mut self.channel_number).prefix("Channel: "));
+            ui.add(
+                egui::DragValue::new(&mut self.time_shift)
+                    .suffix(" ns")
+                    .prefix("Time Shift: "),
+            );
+
+            if ui.button("❌").clicked() {
+                on_remove();
+            }
+        });
+    }
+}
+
 #[derive(Debug)]
 pub enum ShiftError {
     File(std::io::Error),
