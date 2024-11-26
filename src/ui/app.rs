@@ -291,7 +291,10 @@ impl EVBApp {
 
             if ui.button("+").clicked() {
                 let id = self.parameters.channel_map_entries.len() as u32;
-                self.parameters.channel_map_entries.push(Board { id, ..Default::default() }); // This line seems correct, assuming boards is a Vec<Board>
+                self.parameters.channel_map_entries.push(Board {
+                    id,
+                    ..Default::default()
+                }); // This line seems correct, assuming boards is a Vec<Board>
             }
 
             ui.separator();
