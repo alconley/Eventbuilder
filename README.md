@@ -2,7 +2,7 @@
 
 ### Running
 
-Make sure you are using the latest version of stable rust by running `rustup update`.
+Make sure you are using the latest version of stable rust by running `rustup update && cargo update`.
 
 `cargo run --release`
 
