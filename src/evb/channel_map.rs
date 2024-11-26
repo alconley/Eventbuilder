@@ -141,7 +141,7 @@ impl Board {
 
                     for (channel_idx, channel_type) in self.channels.iter_mut().enumerate() {
                         ui.label(format!("{}", channel_idx));
-                        egui::ComboBox::from_id_source(format!(
+                        egui::ComboBox::from_id_salt(format!(
                             "channel_type_{}_{}",
                             board_idx, channel_idx
                         ))

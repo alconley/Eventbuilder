@@ -26,7 +26,7 @@ impl ScalerEntryUI {
                 .on_hover_text("Data_CH<channel_number>@<board_type>_<board_serial_number>");
 
             ui.add_sized(
-                [ui.available_width(), ui.available_height()],
+                [0.9 * ui.available_width(), ui.available_height()],
                 egui::TextEdit::singleline(&mut self.file_pattern)
                     .hint_text("Data_CH<channel_number>@<board_type>_<board_serial_number>")
                     .clip_text(false),

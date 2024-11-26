@@ -47,7 +47,8 @@ fn clean_up_unpack_dir(unpack_dir: &Path) -> Result<(), EVBError> {
 
 fn write_dataframe(data: ChannelData, filepath: &Path) -> Result<(), PolarsError> {
     info!("Writing dataframe to disk at {}", filepath.display());
-    let columns: Vec<Series> = data.convert_to_series();
+    // let columns: Vec<Series> = data.convert_to_series();
+    let columns = data.convert_to_columns();
     let mut df = DataFrame::new(columns)?;
     let mut output_file = File::create(filepath)?;
     ParquetWriter::new(&mut output_file).finish(&mut df)?;
