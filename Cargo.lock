@@ -996,7 +996,6 @@ dependencies = [
  "strum",
  "strum_macros",
  "tar",
- "wasm-bindgen-futures",
 ]
 
 [[package]]
