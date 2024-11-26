@@ -69,6 +69,36 @@ impl KineParameters {
 
         format!("{}({},{}){}", targ_str, proj_str, eject_str, resid_str)
     }
+
+    pub fn ui(&mut self, ui: &mut egui::Ui) {
+        egui::Grid::new("KineGrid").show(ui, |ui| {
+            ui.label("Target Z     ");
+            ui.add(egui::widgets::DragValue::new(&mut self.target_z).speed(1));
+            ui.label("Target A     ");
+            ui.add(egui::widgets::DragValue::new(&mut self.target_a).speed(1));
+            ui.end_row();
+
+            ui.label("Projectile Z");
+            ui.add(egui::widgets::DragValue::new(&mut self.projectile_z).speed(1));
+            ui.label("Projectile A");
+            ui.add(egui::widgets::DragValue::new(&mut self.projectile_a).speed(1));
+            ui.end_row();
+
+            ui.label("Ejectile Z   ");
+            ui.add(egui::widgets::DragValue::new(&mut self.ejectile_z).speed(1));
+            ui.label("Ejectile A   ");
+            ui.add(egui::widgets::DragValue::new(&mut self.ejectile_a).speed(1));
+            ui.end_row();
+
+            ui.label("Magnetic Field(kG)");
+            ui.add(egui::widgets::DragValue::new(&mut self.b_field).speed(10.0));
+            ui.label("SPS Angle(deg)");
+            ui.add(egui::widgets::DragValue::new(&mut self.sps_angle).speed(1.0));
+            ui.end_row();
+            ui.label("Projectile KE(MeV)");
+            ui.add(egui::widgets::DragValue::new(&mut self.projectile_ke).speed(0.01));
+        });
+    }
 }
 
 //Returns z-offset of focal plane in cm

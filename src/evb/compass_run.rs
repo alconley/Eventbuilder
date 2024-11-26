@@ -47,7 +47,8 @@ fn clean_up_unpack_dir(unpack_dir: &Path) -> Result<(), EVBError> {
 
 fn write_dataframe(data: ChannelData, filepath: &Path) -> Result<(), PolarsError> {
     info!("Writing dataframe to disk at {}", filepath.display());
-    let columns: Vec<Series> = data.convert_to_series();
+    // let columns: Vec<Series> = data.convert_to_series();
+    let columns = data.convert_to_columns();
     let mut df = DataFrame::new(columns)?;
     let mut output_file = File::create(filepath)?;
     ParquetWriter::new(&mut output_file).finish(&mut df)?;
@@ -73,13 +74,10 @@ fn process_run(
     let mut total_count: u64 = 0;
     for item in params.unpack_dir_path.read_dir()? {
         let filepath = &item?.path();
-        match &mut scaler_list {
-            Some(list) => {
-                if list.read_scaler(filepath) {
-                    continue;
-                }
+        if let Some(list) = &mut scaler_list {
+            if list.read_scaler(filepath) {
+                continue;
             }
-            None => (),
         };
 
         files.push(CompassFile::new(filepath, params.shift_map)?);

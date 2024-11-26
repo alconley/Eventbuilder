@@ -88,13 +88,109 @@ impl Board {
         ];
         Board { id, channels }
     }
+
+    pub fn cebra(id: u32) -> Board {
+        let channels = [
+            ChannelType::Cebra0,
+            ChannelType::Cebra1,
+            ChannelType::Cebra2,
+            ChannelType::Cebra3,
+            ChannelType::Cebra4,
+            ChannelType::Cebra5,
+            ChannelType::Cebra6,
+            ChannelType::Cebra7,
+            ChannelType::Cebra8,
+            ChannelType::None,
+            ChannelType::None,
+            ChannelType::None,
+            ChannelType::None,
+            ChannelType::None,
+            ChannelType::None,
+            ChannelType::None,
+        ];
+        Board { id, channels }
+    }
+
+    pub fn ui(&mut self, ui: &mut egui::Ui, board_idx: usize, on_remove: impl FnOnce()) {
+        ui.vertical(|ui| {
+            egui::Grid::new(format!("board_{}", board_idx))
+                .num_columns(2)
+                .spacing([20.0, 4.0])
+                .show(ui, |ui| {
+                    ui.add(egui::DragValue::new(&mut self.id).prefix("Board ID: "))
+                        .on_hover_text("If data is from CoMPASS, the board id will start at 0 and increment by 1 for each board.\nIf the data is converted from FSUDAQ to CAEN format, the board id is the id on the digitizer.");
+
+                        ui.horizontal(|ui| {
+                            if ui.small_button("Clear").clicked() {
+                                for channel in self.channels.iter_mut() {
+                                    *channel = ChannelType::None;
+                                }
+                            }
+
+                            ui.separator();
+
+                            if ui.button("❌").clicked() {
+                                on_remove();
+                            }
+                        });
+
+                    ui.end_row();
+                    ui.label("#");
+                    ui.label("Type");
+                    ui.end_row();
+
+                    for (channel_idx, channel_type) in self.channels.iter_mut().enumerate() {
+                        ui.label(format!("{}", channel_idx));
+                        egui::ComboBox::from_id_salt(format!(
+                            "channel_type_{}_{}",
+                            board_idx, channel_idx
+                        ))
+                        .selected_text(format!("{:?}", channel_type))
+                        .show_ui(ui, |ui| {
+                            for variant in [
+                                ChannelType::AnodeFront,
+                                ChannelType::AnodeBack,
+                                ChannelType::ScintLeft,
+                                ChannelType::ScintRight,
+                                ChannelType::Cathode,
+                                ChannelType::DelayFrontLeft,
+                                ChannelType::DelayFrontRight,
+                                ChannelType::DelayBackLeft,
+                                ChannelType::DelayBackRight,
+                                ChannelType::Monitor,
+                                ChannelType::Cebra0,
+                                ChannelType::Cebra1,
+                                ChannelType::Cebra2,
+                                ChannelType::Cebra3,
+                                ChannelType::Cebra4,
+                                ChannelType::Cebra5,
+                                ChannelType::Cebra6,
+                                ChannelType::Cebra7,
+                                ChannelType::Cebra8,
+                                ChannelType::PIPS1000,
+                                ChannelType::PIPS500,
+                                ChannelType::PIPS300,
+                                ChannelType::PIPS100,
+                                ChannelType::CATRINA0,
+                                ChannelType::CATRINA1,
+                                ChannelType::CATRINA2,
+                                ChannelType::None,
+                            ] {
+                                ui.selectable_value(channel_type, variant, variant.as_ref());
+                            }
+                        });
+                        ui.end_row();
+                    }
+                });
+                ui.add_space(1.0);
+        });
+    }
 }
 
 #[derive(Debug)]
 pub enum ChannelMapError {
     IOError(std::io::Error),
     ParseError(ParseIntError),
-    // UnidentifiedChannelError
 }
 
 impl From<std::io::Error> for ChannelMapError {
@@ -120,7 +216,6 @@ impl std::fmt::Display for ChannelMapError {
                 "Channel map had an error parsing the channel map file: {}",
                 x
             ),
-            // ChannelMapError::UnidentifiedChannelError => write!(f, "Channel map found an unidentified field in the channel map file")
         }
     }
 }

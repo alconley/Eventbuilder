@@ -705,9 +705,21 @@ impl ChannelData {
         let sps_cols: Vec<Series> = self
             .fields
             .into_iter()
-            .map(|field| -> Series { Series::new(field.0.as_ref(), field.1) })
+            .map(|field| -> Series { Series::new(field.0.as_ref().into(), field.1) })
             .collect();
 
         sps_cols
+    }
+
+    pub fn convert_to_columns(self) -> Vec<Column> {
+        self.fields
+            .into_iter()
+            .map(|(field, values)| {
+                let name = field.as_ref().into();
+                // Convert each field into a Series and then into a Column
+                let series = Series::new(name, values);
+                Column::Series(series)
+            })
+            .collect()
     }
 }

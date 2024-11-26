@@ -12,7 +12,7 @@ use eframe::egui::{self, Color32, RichText};
 use eframe::App;
 
 use super::ws::{Workspace, WorkspaceError};
-use crate::evb::channel_map::{Board, ChannelType};
+use crate::evb::channel_map::Board;
 use crate::evb::compass_run::{process_runs, ProcessParams};
 use crate::evb::error::EVBError;
 use crate::evb::kinematics::KineParameters;
@@ -199,393 +199,14 @@ impl EVBApp {
         };
     }
 
-    fn channel_map_ui(&mut self, ui: &mut egui::Ui) {
-        ui.label(
-            RichText::new("Channel Map")
-                .color(Color32::LIGHT_BLUE)
-                .size(18.0),
-        );
-
-        if ui.button("Add Board").clicked() {
-            self.parameters.channel_map_entries.push(Board::default()); // This line seems correct, assuming boards is a Vec<Board>
-        }
-
-        // Use a DragValue to adjust the desired number of boards
-        ui.horizontal(|ui| {
-            ui.label("Number of Boards:");
-            let mut desired_board_count = self.parameters.channel_map_entries.len();
-            if ui
-                .add(egui::DragValue::new(&mut desired_board_count).range(0..=16))
-                .changed()
-            {
-                self.parameters
-                    .channel_map_entries
-                    .resize_with(desired_board_count, Board::default);
-            }
-        });
-
-        // Use a horizontal scroll area to contain all the boards
-        egui::ScrollArea::horizontal().show(ui, |ui| {
-            ui.horizontal(|ui| {
-                for (board_idx, board) in self.parameters.channel_map_entries.iter_mut().enumerate()
-                {
-                    ui.vertical(|ui| {
-                        ui.group(|ui| {
-
-                            ui.horizontal(|ui| {
-                                if ui.button("SE-SPS").clicked() {
-                                    *board = Board::sps(board_idx as u32);
-                                }
-
-                                ui.separator();
-                                if ui.button("Clear").clicked() {
-                                    for channel in board.channels.iter_mut() {
-                                        *channel = ChannelType::None;
-                                    }
-                                }
-                            });
-
-                            egui::Grid::new(format!("board_{}", board_idx))
-                                .num_columns(2)
-                                .spacing([20.0, 4.0])
-                                .show(ui, |ui| {
-                                    ui.add(egui::DragValue::new(&mut board.id).prefix("Board ID: ")).on_hover_text("If data is from CoMPASS, the board id will start at 0 and increment by 1 for each board.\nIf the data is converted from FSUDAQ to CAEN format, the board id is the id on the digitzer.");
-                                    ui.end_row();
-                                    ui.label("#");
-                                    ui.label("Type");
-                                    ui.end_row();
-
-                                    for (channel_idx, channel_type) in
-                                        board.channels.iter_mut().enumerate()
-                                    {
-                                        ui.label(format!("{}", channel_idx));
-                                        egui::ComboBox::from_id_source(format!(
-                                            "channel_type_{}_{}",
-                                            board_idx, channel_idx
-                                        ))
-                                        .selected_text(format!("{:?}", channel_type))
-                                        .show_ui(
-                                            ui,
-                                            |ui| {
-                                                // Populate ComboBox with channel types
-
-                                                ui.selectable_value(
-                                                    channel_type,
-                                                    ChannelType::AnodeFront,
-                                                    "AnodeFront",
-                                                );
-                                                ui.selectable_value(
-                                                    channel_type,
-                                                    ChannelType::AnodeBack,
-                                                    "AnodeBack",
-                                                );
-                                                ui.selectable_value(
-                                                    channel_type,
-                                                    ChannelType::ScintLeft,
-                                                    "ScintLeft",
-                                                );
-                                                ui.selectable_value(
-                                                    channel_type,
-                                                    ChannelType::ScintRight,
-                                                    "ScintRight",
-                                                );
-                                                ui.selectable_value(
-                                                    channel_type,
-                                                    ChannelType::Cathode,
-                                                    "Cathode",
-                                                );
-                                                ui.selectable_value(
-                                                    channel_type,
-                                                    ChannelType::DelayFrontLeft,
-                                                    "DelayFrontLeft",
-                                                );
-                                                ui.selectable_value(
-                                                    channel_type,
-                                                    ChannelType::DelayFrontRight,
-                                                    "DelayFrontRight",
-                                                );
-                                                ui.selectable_value(
-                                                    channel_type,
-                                                    ChannelType::DelayBackLeft,
-                                                    "DelayBackLeft",
-                                                );
-                                                ui.selectable_value(
-                                                    channel_type,
-                                                    ChannelType::Monitor,
-                                                    "Monitor",
-                                                );
-                                                ui.selectable_value(
-                                                    channel_type,
-                                                    ChannelType::DelayBackRight,
-                                                    "DelayBackRight",
-                                                );
-                                                ui.selectable_value(
-                                                    channel_type,
-                                                    ChannelType::Cebra0,
-                                                    "Cebra0",
-                                                );
-                                                ui.selectable_value(
-                                                    channel_type,
-                                                    ChannelType::Cebra1,
-                                                    "Cebra1",
-                                                );
-                                                ui.selectable_value(
-                                                    channel_type,
-                                                    ChannelType::Cebra2,
-                                                    "Cebra2",
-                                                );
-                                                ui.selectable_value(
-                                                    channel_type,
-                                                    ChannelType::Cebra3,
-                                                    "Cebra3",
-                                                );
-                                                ui.selectable_value(
-                                                    channel_type,
-                                                    ChannelType::Cebra4,
-                                                    "Cebra4",
-                                                );
-                                                ui.selectable_value(
-                                                    channel_type,
-                                                    ChannelType::Cebra5,
-                                                    "Cebra5",
-                                                );
-                                                ui.selectable_value(
-                                                    channel_type,
-                                                    ChannelType::Cebra6,
-                                                    "Cebra6",
-                                                );
-                                                ui.selectable_value(
-                                                    channel_type,
-                                                    ChannelType::Cebra7,
-                                                    "Cebra7",
-                                                );
-                                                ui.selectable_value(
-                                                    channel_type,
-                                                    ChannelType::Cebra8,
-                                                    "Cebra8",
-                                                );
-                                                ui.selectable_value(
-                                                    channel_type,
-                                                    ChannelType::PIPS1000,
-                                                    "PIPS1000",
-                                                );
-                                                ui.selectable_value(
-                                                    channel_type,
-                                                    ChannelType::PIPS500,
-                                                    "PIPS500",
-                                                );
-                                                ui.selectable_value(
-                                                    channel_type,
-                                                    ChannelType::PIPS300,
-                                                    "PIPS300",
-                                                );
-                                                ui.selectable_value(
-                                                    channel_type,
-                                                    ChannelType::PIPS100,
-                                                    "PIPS100",
-                                                );
-                                                ui.selectable_value(
-                                                    channel_type,
-                                                    ChannelType::CATRINA0,
-                                                    "CATRINA0",
-                                                );
-                                                ui.selectable_value(
-                                                    channel_type,
-                                                    ChannelType::CATRINA1,
-                                                    "CATRINA1",
-                                                );
-                                                ui.selectable_value(
-                                                    channel_type,
-                                                    ChannelType::CATRINA2,
-                                                    "CATRINA2",
-                                                );
-                                                ui.selectable_value(
-                                                    channel_type,
-                                                    ChannelType::None,
-                                                    "None",
-                                                );
-                                            },
-                                        );
-                                        ui.end_row();
-                                    }
-                                });
-                        });
-                    });
-                    ui.add_space(1.0); // Add space between boards
-                }
-            });
-        });
-    }
-
-    fn shift_map_ui(&mut self, ui: &mut egui::Ui) {
-        ui.label(
-            RichText::new("Time Shift Map")
-                .color(Color32::LIGHT_BLUE)
-                .size(18.0),
-        );
-
-        // Assuming `self.shift_map_entries` is a Vec<ShiftMapEntry>
-        if ui.button("Add Entry").clicked() {
-            // Add a new entry with default values
-            self.parameters.shift_map_entries.push(ShiftMapEntry {
-                board_number: 0,
-                channel_number: 0,
-                time_shift: 0.0,
-            });
-        }
-
-        // Iterate over each entry with its index
-        let mut to_remove = Vec::new(); // Collect indices of entries to remove
-        for (index, entry) in self.parameters.shift_map_entries.iter_mut().enumerate() {
-            ui.horizontal(|ui| {
-                // Allow the user to input board number, channel number, and time shift
-                ui.label("Board:");
-                ui.add(egui::DragValue::new(&mut entry.board_number));
-                ui.label("Channel:");
-                ui.add(egui::DragValue::new(&mut entry.channel_number));
-                ui.label("Time Shift:");
-                ui.add(egui::DragValue::new(&mut entry.time_shift).suffix(" ns"));
-
-                // Button to remove the current entry
-                if ui.button("❌").clicked() {
-                    to_remove.push(index);
-                }
-            });
-        }
-
-        // Remove entries marked for removal
-        // Iterate in reverse to ensure indices remain valid after removals
-        for &index in to_remove.iter().rev() {
-            self.parameters.shift_map_entries.remove(index);
-        }
-    }
-
-    fn scaler_list_ui(&mut self, ui: &mut egui::Ui) {
-        ui.label(
-            RichText::new("Scalar List")
-                .color(Color32::LIGHT_BLUE)
-                .size(18.0),
-        );
-
-        if ui.button("Add Scaler Entry").clicked() {
-            // Add a new entry with default values
-            self.parameters.scaler_list_entries.push(ScalerEntryUI {
-                file_pattern: "".to_string(),
-                scaler_name: "".to_string(),
-            });
-        }
-
-        // Use a `ScrollArea` to ensure the UI can handle many entries
-        // egui::ScrollArea::horizontal().show(ui, |ui| {
-        let mut to_remove = Vec::new(); // Indices of entries to remove
-        for (index, entry) in self.parameters.scaler_list_entries.iter_mut().enumerate() {
-            ui.horizontal(|ui| {
-                ui.label("File Pattern:")
-                    .on_hover_text("Data_CH<channel_number>@<board_type>_<board_serial_number>");
-                ui.text_edit_singleline(&mut entry.file_pattern);
-                ui.label("Scaler Name:");
-                ui.text_edit_singleline(&mut entry.scaler_name);
-
-                // Button to remove the current entry
-                if ui.button("❌").clicked() {
-                    to_remove.push(index);
-                }
-            });
-        }
-
-        // Remove entries marked for removal, in reverse order to maintain correct indices
-        for &index in to_remove.iter().rev() {
-            self.parameters.scaler_list_entries.remove(index);
-        }
-        // });
-    }
-
-    fn kinematics_ui(&mut self, ui: &mut egui::Ui) {
-        ui.label(
-            RichText::new("Kinematics")
-                .color(Color32::LIGHT_BLUE)
-                .size(18.0),
-        );
-
-        egui::Grid::new("KineGrid").show(ui, |ui| {
-            ui.label("Target Z     ");
-            ui.add(
-                egui::widgets::DragValue::new(&mut self.parameters.kinematics.target_z).speed(1),
-            );
-            ui.label("Target A     ");
-            ui.add(
-                egui::widgets::DragValue::new(&mut self.parameters.kinematics.target_a).speed(1),
-            );
-            ui.end_row();
-
-            ui.label("Projectile Z");
-            ui.add(
-                egui::widgets::DragValue::new(&mut self.parameters.kinematics.projectile_z)
-                    .speed(1),
-            );
-            ui.label("Projectile A");
-            ui.add(
-                egui::widgets::DragValue::new(&mut self.parameters.kinematics.projectile_a)
-                    .speed(1),
-            );
-            ui.end_row();
-
-            ui.label("Ejectile Z   ");
-            ui.add(
-                egui::widgets::DragValue::new(&mut self.parameters.kinematics.ejectile_z).speed(1),
-            );
-            ui.label("Ejectile A   ");
-            ui.add(
-                egui::widgets::DragValue::new(&mut self.parameters.kinematics.ejectile_a).speed(1),
-            );
-            ui.end_row();
-
-            ui.label("Magnetic Field(kG)");
-            ui.add(
-                egui::widgets::DragValue::new(&mut self.parameters.kinematics.b_field).speed(10.0),
-            );
-            ui.label("SPS Angle(deg)");
-            ui.add(
-                egui::widgets::DragValue::new(&mut self.parameters.kinematics.sps_angle).speed(1.0),
-            );
-            ui.label("Projectile KE(MeV)");
-            ui.add(
-                egui::widgets::DragValue::new(&mut self.parameters.kinematics.projectile_ke)
-                    .speed(0.01),
-            );
-            ui.end_row();
-
-            ui.label("Reaction Equation");
-            ui.label(&self.rxn_eqn);
-            if ui.button("Set Kinematics").clicked() {
-                self.rxn_eqn = self.parameters.kinematics.generate_rxn_eqn(&self.mass_map);
-            }
-
-            // if mass map is empty, load it
-            // need this for persistence to work with the mass map for the set kinematics button
-            if self.mass_map.is_empty() {
-                match MassMap::new() {
-                    Ok(mass_map) => self.mass_map = mass_map,
-                    Err(e) => error!("Error loading mass map: {}", e),
-                }
-            }
-        });
-    }
-
     fn main_tab_ui(&mut self, ui: &mut egui::Ui) {
         //Files/Workspace
-        ui.separator();
-        ui.label(
-            RichText::new("Run Information")
-                .color(Color32::LIGHT_BLUE)
-                .size(18.0),
-        );
-        egui::Grid::new("RunGrid").show(ui, |ui| {
-            ui.label("Workspace: ");
-            ui.label(match &self.parameters.workspace {
-                Some(ws) => ws.get_parent_str(),
-                None => "None",
-            });
+        ui.horizontal(|ui| {
+            ui.label(
+                RichText::new("Run Information")
+                    .color(Color32::LIGHT_BLUE)
+                    .size(18.0),
+            );
 
             if ui.button("Open").clicked() {
                 let result = rfd::FileDialog::new()
@@ -602,14 +223,23 @@ impl EVBApp {
                     }
                 }
             }
+        });
 
-            ui.end_row();
+        ui.horizontal_wrapped(|ui| {
+            ui.label("Current Folder: ");
+            ui.label(match &self.parameters.workspace {
+                Some(ws) => ws.get_parent_str(),
+                None => "None",
+            });
+        });
 
-            ui.label("Coincidence Window (ns)");
+        egui::Grid::new("RunGrid").show(ui, |ui| {
+            ui.label("Coincidence Window");
             ui.add(
                 egui::widgets::DragValue::new(&mut self.parameters.coincidence_window)
                     .speed(100)
-                    .custom_formatter(|n, _| format!("{:e}", n)),
+                    .custom_formatter(|n, _| format!("{:e}", n))
+                    .suffix(" ns"),
             );
             ui.end_row();
 
@@ -620,6 +250,154 @@ impl EVBApp {
             ui.label("Run Max");
             ui.add(egui::widgets::DragValue::new(&mut self.parameters.run_max).speed(1));
         });
+    }
+
+    fn kinematics_ui(&mut self, ui: &mut egui::Ui) {
+        ui.label(
+            RichText::new("Kinematics")
+                .color(Color32::LIGHT_BLUE)
+                .size(18.0),
+        );
+
+        self.parameters.kinematics.ui(ui);
+
+        ui.separator();
+
+        ui.horizontal(|ui| {
+            ui.label("Reaction:");
+            ui.label(&self.rxn_eqn);
+            if ui.button("View").clicked() {
+                self.rxn_eqn = self.parameters.kinematics.generate_rxn_eqn(&self.mass_map);
+            }
+        });
+
+        // if mass map is empty, load it
+        // need this for persistence to work with the mass map for the set kinematics button
+        if self.mass_map.is_empty() {
+            match MassMap::new() {
+                Ok(mass_map) => self.mass_map = mass_map,
+                Err(e) => error!("Error loading mass map: {}", e),
+            }
+        }
+    }
+
+    fn channel_map_ui(&mut self, ui: &mut egui::Ui) {
+        ui.horizontal(|ui| {
+            ui.label(
+                RichText::new("Channel Map")
+                    .color(Color32::LIGHT_BLUE)
+                    .size(18.0),
+            );
+
+            if ui.button("+").clicked() {
+                let id = self.parameters.channel_map_entries.len() as u32;
+                self.parameters.channel_map_entries.push(Board {
+                    id,
+                    ..Default::default()
+                }); // This line seems correct, assuming boards is a Vec<Board>
+            }
+
+            ui.separator();
+
+            ui.label("Default Boards:");
+
+            if ui.button("SE-SPS").clicked() {
+                let id = self.parameters.channel_map_entries.len() as u32;
+                let board = Board::sps(id);
+                self.parameters.channel_map_entries.push(board);
+            }
+
+            if ui.button("CeBrA").clicked() {
+                let id = self.parameters.channel_map_entries.len() as u32;
+                let board = Board::cebra(id);
+                self.parameters.channel_map_entries.push(board);
+            }
+        });
+
+        ui.add_space(1.0);
+
+        // egui::ScrollArea::both().show(ui, |ui| {
+        ui.horizontal(|ui| {
+            let mut remove_indices = vec![];
+            for (board_idx, board) in self.parameters.channel_map_entries.iter_mut().enumerate() {
+                board.ui(ui, board_idx, || {
+                    remove_indices.push(board_idx);
+                });
+                ui.separator();
+                ui.add_space(1.0);
+            }
+
+            for &idx in remove_indices.iter().rev() {
+                self.parameters.channel_map_entries.remove(idx);
+            }
+        });
+        // });
+    }
+
+    fn shift_map_ui(&mut self, ui: &mut egui::Ui) {
+        ui.horizontal(|ui| {
+            ui.label(
+                RichText::new("Time Shift Map")
+                    .color(Color32::LIGHT_BLUE)
+                    .size(18.0),
+            );
+
+            // Assuming `self.shift_map_entries` is a Vec<ShiftMapEntry>
+            if ui.button("+").clicked() {
+                // Add a new entry with default values
+                self.parameters.shift_map_entries.push(ShiftMapEntry {
+                    board_number: 0,
+                    channel_number: 0,
+                    time_shift: 0.0,
+                });
+            }
+        });
+
+        let mut remove_indices = vec![];
+        for (index, entry) in self.parameters.shift_map_entries.iter_mut().enumerate() {
+            entry.ui(ui, || {
+                remove_indices.push(index);
+            });
+        }
+
+        // Remove entries marked for removal
+        // Iterate in reverse to ensure indices remain valid after removals
+        for &index in remove_indices.iter().rev() {
+            self.parameters.shift_map_entries.remove(index);
+        }
+    }
+
+    fn scaler_list_ui(&mut self, ui: &mut egui::Ui) {
+        ui.horizontal(|ui| {
+            ui.label(
+                RichText::new("Scalar List")
+                    .color(Color32::LIGHT_BLUE)
+                    .size(18.0),
+            );
+
+            if ui.button("+").clicked() {
+                // Add a new entry with default values
+                self.parameters.scaler_list_entries.push(ScalerEntryUI {
+                    file_pattern: "".to_string(),
+                    scaler_name: "".to_string(),
+                });
+            }
+        });
+
+        // Use a `ScrollArea` to ensure the UI can handle many entries
+        // egui::ScrollArea::horizontal().show(ui, |ui| {
+        let mut to_remove = Vec::new(); // Indices of entries to remove
+        for (index, entry) in self.parameters.scaler_list_entries.iter_mut().enumerate() {
+            entry.ui(ui, || {
+                to_remove.push(index);
+            });
+        }
+
+        // Remove entries marked for removal, in reverse order to maintain correct indices
+        for &index in to_remove.iter().rev() {
+            self.parameters.scaler_list_entries.remove(index);
+        }
+        // });
     }
 
     fn ui_tabs(&mut self, ui: &mut egui::Ui) {
@@ -670,16 +448,55 @@ impl EVBApp {
             });
         });
 
-        match self.active_tab {
+        egui::ScrollArea::both().show(ui, |ui| match self.active_tab {
             ActiveTab::MainTab => self.main_tab_ui(ui),
             ActiveTab::Kinematics => self.kinematics_ui(ui),
             ActiveTab::ChannelMap => self.channel_map_ui(ui),
             ActiveTab::ShiftMap => self.shift_map_ui(ui),
             ActiveTab::ScalerList => self.scaler_list_ui(ui),
-        }
+        });
+    }
+
+    fn progress_ui(&mut self, ui: &mut egui::Ui) {
+        egui::TopBottomPanel::bottom("cebra_sps_bottom_panel").show_inside(ui, |ui| {
+            ui.add(
+                egui::widgets::ProgressBar::new(match self.progress.lock() {
+                    Ok(x) => *x,
+                    Err(_) => 0.0,
+                })
+                .show_percentage(),
+            );
+
+            // Check if the thread handle exists to determine if the process is running
+            let is_running = self.thread_handle.is_some();
+            if is_running {
+                ui.add(egui::Spinner::new());
+            }
+
+            if ui
+                .add_enabled(
+                    self.thread_handle.is_none(),
+                    egui::widgets::Button::new("Run"),
+                )
+                .clicked()
+            {
+                info!("Starting processor...");
+                match self.check_and_startup_processing_thread() {
+                    Ok(_) => (),
+                    Err(e) => error!(
+                        "Could not start processor, recieved the following error: {}",
+                        e
+                    ),
+                };
+            } else {
+                self.check_and_shutdown_processing_thread();
+            }
+        });
     }
 
     fn ui(&mut self, ui: &mut egui::Ui) {
+        self.progress_ui(ui);
+
         ui.menu_button("File", |ui| {
             if ui.button("Open Config...").clicked() {
                 let result = rfd::FileDialog::new()
@@ -706,41 +523,6 @@ impl EVBApp {
         ui.separator();
 
         self.ui_tabs(ui);
-
-        ui.separator();
-
-        ui.add(
-            egui::widgets::ProgressBar::new(match self.progress.lock() {
-                Ok(x) => *x,
-                Err(_) => 0.0,
-            })
-            .show_percentage(),
-        );
-
-        // Check if the thread handle exists to determine if the process is running
-        let is_running = self.thread_handle.is_some();
-        if is_running {
-            ui.add(egui::Spinner::new());
-        }
-
-        if ui
-            .add_enabled(
-                self.thread_handle.is_none(),
-                egui::widgets::Button::new("Run"),
-            )
-            .clicked()
-        {
-            info!("Starting processor...");
-            match self.check_and_startup_processing_thread() {
-                Ok(_) => (),
-                Err(e) => error!(
-                    "Could not start processor, recieved the following error: {}",
-                    e
-                ),
-            };
-        } else {
-            self.check_and_shutdown_processing_thread();
-        }
     }
 }
 
@@ -750,7 +532,6 @@ impl App for EVBApp {
         eframe::set_value(storage, eframe::APP_KEY, self);
     }
 
-    #[cfg(not(target_arch = "wasm32"))]
     fn update(&mut self, ctx: &eframe::egui::Context, _frame: &mut eframe::Frame) {
         if self.window {
             egui::Window::new("CeBrA - SE-SPS Event Builder")
@@ -764,12 +545,5 @@ impl App for EVBApp {
                 self.ui(ui);
             });
         }
-    }
-
-    #[cfg(target_arch = "wasm32")]
-    fn update(&mut self, ctx: &eframe::egui::Context, _frame: &mut eframe::Frame) {
-        egui::CentralPanel::default().show(ctx, |ui| {
-            ui.label("CeBrA - SPS Eventbuilder is not supported in the browser.");
-        });
     }
 }
