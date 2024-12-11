@@ -2,8 +2,8 @@ use super::channel_map::{ChannelMap, ChannelType};
 #[allow(unused_imports)]
 use super::compass_data::{decompose_uuid_to_board_channel, CompassData};
 use super::used_size::UsedSize;
-use std::collections::BTreeMap;
 use std::hash::Hash;
+use std::{collections::BTreeMap, vec};
 
 use strum::IntoEnumIterator;
 use strum_macros::{AsRefStr, EnumCount, EnumIter};
@@ -48,6 +48,8 @@ pub enum ChannelDataField {
     X2,
     Xavg,
     Theta,
+    X,
+    Z,
 
     Cebra0Energy,
     Cebra1Energy,
@@ -140,6 +142,8 @@ impl ChannelDataField {
                     ChannelDataField::X1
                     | ChannelDataField::X2
                     | ChannelDataField::Xavg
+                    | ChannelDataField::X
+                    | ChannelDataField::Z
                     | ChannelDataField::Theta => all_delay_lines_present,
                     // Filter other fields based on the channel map
                     ChannelDataField::AnodeFrontEnergy
@@ -338,6 +342,7 @@ impl UsedSize for ChannelDataField {
 pub struct ChannelData {
     //Columns must always come in same order, so use sorted map
     pub fields: BTreeMap<ChannelDataField, Vec<f64>>,
+    pub nested_fields: BTreeMap<ChannelDataField, Vec<Vec<f64>>>,
     pub rows: usize,
 }
 
@@ -346,6 +351,7 @@ impl Default for ChannelData {
         let fields = ChannelDataField::get_field_vec();
         let mut data = ChannelData {
             fields: BTreeMap::new(),
+            nested_fields: BTreeMap::new(),
             rows: 0,
         };
         fields.into_iter().for_each(|f| {
@@ -367,10 +373,15 @@ impl ChannelData {
         let fields = ChannelDataField::get_filtered_field_vec(channel_map);
         let mut data = ChannelData {
             fields: BTreeMap::new(),
+            nested_fields: BTreeMap::new(),
             rows: 0,
         };
         fields.into_iter().for_each(|f| {
-            data.fields.insert(f, vec![]);
+            if f == ChannelDataField::X || f == ChannelDataField::Z {
+                data.nested_fields.insert(f, vec![vec![]]);
+            } else {
+                data.fields.insert(f, vec![]);
+            }
         });
         data
     }
@@ -382,6 +393,14 @@ impl ChannelData {
                 field.1.push(INVALID_VALUE)
             }
         }
+
+        // Pad nested fields
+        for field in self.nested_fields.iter_mut() {
+            // Pad outer vector to match rows
+            if field.1.len() < self.rows {
+                field.1.push(vec![INVALID_VALUE]); // Push an empty vector if missing
+            }
+        }
     }
 
     //Update the last element to the given value
@@ -390,6 +409,12 @@ impl ChannelData {
             if let Some(back) = list.last_mut() {
                 *back = value;
             }
+        }
+    }
+
+    fn set_nested_values(&mut self, field: &ChannelDataField, values: Vec<f64>) {
+        if let Some(nested) = self.nested_fields.get_mut(field) {
+            nested.push(values);
         }
     }
 
@@ -633,6 +658,18 @@ impl ChannelData {
                 Some(w) => self.set_value(&ChannelDataField::Xavg, w.0 * x1 + w.1 * x2),
                 None => self.set_value(&ChannelDataField::Xavg, INVALID_VALUE),
             };
+
+            let z_values: Vec<f64> = (0..400)
+                .map(|i| -50.0 + (100.0 / 400.0) * i as f64)
+                .collect();
+
+            let x_values: Vec<f64> = z_values
+                .iter()
+                .map(|&z| (z / 42.8625 + 0.5) * (x2 - x1) + x1)
+                .collect();
+
+            self.set_nested_values(&ChannelDataField::X, x_values);
+            self.set_nested_values(&ChannelDataField::Z, z_values);
         }
 
         if scint_left_time != INVALID_VALUE {
@@ -701,18 +738,11 @@ impl ChannelData {
         }
     }
 
-    pub fn convert_to_series(self) -> Vec<Series> {
-        let sps_cols: Vec<Series> = self
-            .fields
-            .into_iter()
-            .map(|field| -> Series { Series::new(field.0.as_ref().into(), field.1) })
-            .collect();
-
-        sps_cols
-    }
-
     pub fn convert_to_columns(self) -> Vec<Column> {
-        self.fields
+        let mut columns = vec![];
+
+        let normal_columns: Vec<Column> = self
+            .fields
             .into_iter()
             .map(|(field, values)| {
                 let name = field.as_ref().into();
@@ -720,6 +750,30 @@ impl ChannelData {
                 let series = Series::new(name, values);
                 Column::Series(series)
             })
-            .collect()
+            .collect();
+
+        columns.extend(normal_columns);
+
+        let nested_columns: Vec<Column> = self
+            .nested_fields
+            .into_iter()
+            .map(|(field, nested_values)| {
+                let name = field.as_ref().into();
+
+                // Convert Vec<Vec<f64>> into a ListChunked
+                let list_chunked = ListChunked::from_iter(
+                    nested_values
+                        .into_iter()
+                        .map(|inner_vec| Some(Series::new("".into(), inner_vec))),
+                )
+                .with_name(name);
+
+                Column::Series(list_chunked.into_series())
+            })
+            .collect();
+
+        columns.extend(nested_columns);
+
+        columns
     }
 }
