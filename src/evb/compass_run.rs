@@ -232,7 +232,13 @@ pub fn process_runs(
             unpack_dir_path: params.unpack_dir.clone(),
             output_file_path: params.output_dir.join(format!("run_{}.parquet", run)),
             scalerlist: params.scaler_list.clone(),
-            scalerout_file_path: params.output_dir.join(format!("run_{}_scalers.txt", run)),
+            // scalerout_file_path: params.output_dir.join(format!("run_{}_scalers.txt", run)),
+            scalerout_file_path: params
+                .output_dir
+                .parent() // Navigate one level up from output_dir
+                .unwrap() // Safely unwrap, assuming output_dir has a parent
+                .join("scalers") // Append the "scalers" directory
+                .join(format!("run_{}_scalers.txt", run)),
             nuc_map: &mass_map,
             channel_map: &channel_map,
             shift_map: &Some(shift_map.clone()),

@@ -70,9 +70,9 @@ impl<'a> CompassFile<'a> {
             datatype |= CompassDataType::ENERGY_CALIBRATED;
             datasize += 8;
         }
-        // if header_word & CompassDataType::WAVES.bits() != 0 {
-        //     return Err(EVBError::Waves);
-        // }
+        if header_word & CompassDataType::WAVES.bits() != 0 {
+            return Err(EVBError::Waves);
+        }
 
         Ok(CompassFile {
             file_handle: BufReader::with_capacity(datasize * BUFFER_SIZE_HITS, file),

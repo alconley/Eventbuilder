@@ -363,7 +363,7 @@ impl Default for ChannelData {
 
 impl UsedSize for ChannelData {
     fn get_used_size(&self) -> usize {
-        self.fields.get_used_size()
+        self.fields.get_used_size() + self.nested_fields.get_used_size()
     }
 }
 
@@ -748,7 +748,7 @@ impl ChannelData {
                 let name = field.as_ref().into();
                 // Convert each field into a Series and then into a Column
                 let series = Series::new(name, values);
-                Column::Series(series)
+                Column::Series(series.into())
             })
             .collect();
 
@@ -768,7 +768,7 @@ impl ChannelData {
                 )
                 .with_name(name);
 
-                Column::Series(list_chunked.into_series())
+                Column::Series(list_chunked.into_series().into())
             })
             .collect();
 
