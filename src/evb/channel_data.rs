@@ -434,6 +434,7 @@ impl ChannelData {
 
         // for cebra relative time
         let mut scint_left_time = INVALID_VALUE;
+        let mut anode_back_time = INVALID_VALUE;
         let mut cebra0_time = INVALID_VALUE;
         let mut cebra1_time = INVALID_VALUE;
         let mut cebra2_time = INVALID_VALUE;
@@ -508,6 +509,7 @@ impl ChannelData {
                     self.set_value(&ChannelDataField::AnodeBackEnergy, hit.energy);
                     self.set_value(&ChannelDataField::AnodeBackShort, hit.energy_short);
                     self.set_value(&ChannelDataField::AnodeBackTime, hit.timestamp);
+                    anode_back_time = hit.timestamp;
                 }
 
                 ChannelType::Cebra0 => {
@@ -672,7 +674,7 @@ impl ChannelData {
             self.set_nested_values(&ChannelDataField::Z, z_values);
         }
 
-        if scint_left_time != INVALID_VALUE {
+        if scint_left_time != INVALID_VALUE && anode_back_time != INVALID_VALUE {
             if cebra0_time != INVALID_VALUE {
                 self.set_value(
                     &ChannelDataField::Cebra0RelTime,
