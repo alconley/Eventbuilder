@@ -1,3 +1,4 @@
+pub mod archivist;
 pub mod channel_data;
 pub mod channel_map;
 pub mod compass_data;
