@@ -15,7 +15,7 @@ impl Default for SSH {
             enabled: false,
             user: "spieker-group".to_string(),
             host: "spiekerlab.physics.fsu.edu".to_string(),
-            password: "$PIEKER#_group".to_string(),
+            password: "".to_string(),
         }
     }
 }
