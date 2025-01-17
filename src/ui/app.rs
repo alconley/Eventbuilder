@@ -12,6 +12,7 @@ use eframe::egui::{self, Color32, RichText};
 use eframe::App;
 
 use super::ws::{Workspace, WorkspaceError};
+use crate::evb::archivist::Archivist;
 use crate::evb::channel_map::Board;
 use crate::evb::compass_run::{process_runs, ProcessParams};
 use crate::evb::error::EVBError;
@@ -49,6 +50,7 @@ impl Default for EvbAppParams {
 
 #[derive(Debug, PartialEq, Serialize, Deserialize)]
 enum ActiveTab {
+    Archivist,
     MainTab,
     Kinematics,
     ChannelMap,
@@ -68,6 +70,7 @@ pub struct EVBApp {
     progress: Arc<Mutex<f32>>,
 
     parameters: EvbAppParams,
+    archivist: Archivist,
     rxn_eqn: String,
     active_tab: ActiveTab,
 
@@ -89,6 +92,7 @@ impl EVBApp {
         EVBApp {
             progress: Arc::new(Mutex::new(0.0)),
             parameters: EvbAppParams::default(),
+            archivist: Archivist::default(),
             active_tab: ActiveTab::MainTab,
             rxn_eqn: String::from("None"),
             mass_map: MassMap::new().expect("Could not open amdc data, shutting down!"),
@@ -404,6 +408,12 @@ impl EVBApp {
         egui::TopBottomPanel::top("cebra_sps_top_panel").show_inside(ui, |ui| {
             ui.horizontal(|ui| {
                 if ui
+                    .selectable_label(matches!(self.active_tab, ActiveTab::Archivist), "Archivist")
+                    .clicked()
+                {
+                    self.active_tab = ActiveTab::Archivist;
+                }
+                if ui
                     .selectable_label(
                         matches!(self.active_tab, ActiveTab::MainTab),
                         "Eventbuilder",
@@ -449,6 +459,7 @@ impl EVBApp {
         });
 
         egui::ScrollArea::both().show(ui, |ui| match self.active_tab {
+            ActiveTab::Archivist => self.archivist.ui(ui),
             ActiveTab::MainTab => self.main_tab_ui(ui),
             ActiveTab::Kinematics => self.kinematics_ui(ui),
             ActiveTab::ChannelMap => self.channel_map_ui(ui),
@@ -458,6 +469,9 @@ impl EVBApp {
     }
 
     fn progress_ui(&mut self, ui: &mut egui::Ui) {
+        if self.active_tab == ActiveTab::Archivist {
+            return;
+        }
         egui::TopBottomPanel::bottom("cebra_sps_bottom_panel").show_inside(ui, |ui| {
             ui.add(
                 egui::widgets::ProgressBar::new(match self.progress.lock() {
