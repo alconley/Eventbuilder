@@ -79,11 +79,121 @@ impl Archivist {
         }
     }
 
-    // pub fn run_archive_ssh(&self, run_no: u32) {
-    //     let password = self.ssh.password.clone();
-    //     let user = self.ssh.user.clone();
-    //     let host = self.ssh.host.clone();
-    // }
+    pub fn run_archive_ssh(&self, run_no: u32) {
+        if !self.ssh.enabled {
+            log::error!("SSH is not enabled in the configuration.");
+            return;
+        }
+
+        let archive_path = format!("{}/run_{}.tar.gz", self.output_path, run_no);
+        let binary_dir = format!("{}/DAQ/run_{}/UNFILTERED", self.compass_path, run_no);
+
+        println!(
+            "Running archivist over SSH for binary data in {:?} to create archive {:?}...",
+            binary_dir, archive_path
+        );
+
+        // Step 1: Tar the files on the remote server
+        let remote_archive_path = format!("/tmp/run_{}.tar.gz", run_no);
+        let ssh_tar_command = format!(
+            "sshpass -p '{}' ssh {}@{} \"cd {} && tar -cvzf {} ./*.BIN\"",
+            self.ssh.password, self.ssh.user, self.ssh.host, binary_dir, remote_archive_path
+        );
+
+        let tar_output = Command::new("bash")
+            .arg("-c")
+            .arg(&ssh_tar_command)
+            .output();
+
+        if let Err(e) = tar_output {
+            log::error!("Failed to run SSH tar command: {}", e);
+            return;
+        }
+
+        let tar_output = tar_output.unwrap();
+        if !tar_output.status.success() {
+            log::error!(
+                "Error during remote tar creation: {}",
+                String::from_utf8_lossy(&tar_output.stderr)
+            );
+            return;
+        }
+
+        println!(
+            "\tRemote tarball created successfully at {:?}.",
+            remote_archive_path
+        );
+
+        // Step 2: Copy the tarball from the remote server to the local machine
+        let scp_command = format!(
+            "sshpass -p '{}' scp {}@{}:{} {}",
+            self.ssh.password, self.ssh.user, self.ssh.host, remote_archive_path, archive_path
+        );
+
+        let scp_output = Command::new("bash").arg("-c").arg(&scp_command).output();
+
+        if let Err(e) = scp_output {
+            log::error!("Failed to run SCP command: {}", e);
+            return;
+        }
+
+        let scp_output = scp_output.unwrap();
+        if !scp_output.status.success() {
+            log::error!(
+                "Error during SCP: {}",
+                String::from_utf8_lossy(&scp_output.stderr)
+            );
+            return;
+        }
+
+        println!(
+            "\tTarball successfully copied to local path {:?}.",
+            archive_path
+        );
+
+        // Step 3: Optionally clean up the remote tarball
+        let ssh_cleanup_command = format!(
+            "sshpass -p '{}' ssh {}@{} \"rm -f {}\"",
+            self.ssh.password, self.ssh.user, self.ssh.host, remote_archive_path
+        );
+
+        let cleanup_output = Command::new("bash")
+            .arg("-c")
+            .arg(&ssh_cleanup_command)
+            .output();
+
+        if let Err(e) = cleanup_output {
+            log::warn!("Failed to clean up remote tarball: {}", e);
+        } else {
+            let cleanup_output = cleanup_output.unwrap();
+            if !cleanup_output.status.success() {
+                log::warn!(
+                    "Error during remote cleanup: {}",
+                    String::from_utf8_lossy(&cleanup_output.stderr)
+                );
+            } else {
+                println!("\tRemote tarball cleaned up successfully.");
+            }
+        }
+    }
+
+    fn archive(&self) {
+        if self.ssh.enabled {
+            if self.multiple_runs {
+                for run_no in self.min_run..=self.max_run {
+                    self.run_archive_ssh(run_no);
+                }
+            } else {
+                self.run_archive_ssh(self.min_run);
+            }
+        } else if self.multiple_runs {
+            for run_no in self.min_run..=self.max_run {
+                self.run_archive(run_no);
+            }
+        } else {
+            self.run_archive(self.min_run);
+        }
+    }
 
     pub fn ui(&mut self, ui: &mut egui::Ui) {
         ui.horizontal(|ui| {
@@ -136,38 +246,7 @@ impl Archivist {
         });
 
         if ui.button("Archive").clicked() {
-            if self.multiple_runs {
-                for run in self.min_run..=self.max_run {
-                    self.run_archive(run);
-                }
-            } else {
-                self.run_archive(self.min_run);
-            }
-            // if self.ssh.enabled {
-            //     if self.multiple_runs {
-            //         for run_no in self.min_run..=self.max_run {
-            //             if let Err(e) = self.run_archive_ssh(run_no) {
-            //                 eprintln!("Error archiving run {}: {}", run_no, e);
-            //             }
-            //         }
-            //     } else {
-            //         if let Err(e) = self.run_archive_ssh(self.min_run) {
-            //             eprintln!("Error archiving run {}: {}", self.min_run, e);
-            //         }
-            //     }
-            // } else {
-            //     if self.multiple_runs {
-            //         for run_no in self.min_run..=self.max_run {
-            //             if let Err(e) = self.run_archive(run_no) {
-            //                 eprintln!("Error archiving run {}: {}", run_no, e);
-            //             }
-            //         }
-            //     } else {
-            //         if let Err(e) = self.run_archive(self.min_run) {
-            //             eprintln!("Error archiving run {}: {}", self.min_run, e);
-            //         }
-            //     }
-            // }
+            self.archive();
         }
     }
 }

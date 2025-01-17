@@ -469,6 +469,9 @@ impl EVBApp {
     }
 
     fn progress_ui(&mut self, ui: &mut egui::Ui) {
+        if self.active_tab == ActiveTab::Archivist {
+            return;
+        }
         egui::TopBottomPanel::bottom("cebra_sps_bottom_panel").show_inside(ui, |ui| {
             ui.add(
                 egui::widgets::ProgressBar::new(match self.progress.lock() {

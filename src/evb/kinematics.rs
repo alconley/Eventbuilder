@@ -103,24 +103,17 @@ impl KineParameters {
 
 //Returns z-offset of focal plane in cm
 fn calculate_z_offset(params: &KineParameters, nuc_map: &MassMap) -> Option<f64> {
-    let target = match nuc_map.get_data(&params.target_z, &params.target_a) {
-        Some(data) => data,
-        None => return None,
-    };
-
+    let target = nuc_map.get_data(&params.target_z, &params.target_a)?;
     info!("Target: {:?}", target);
-    let projectile = match nuc_map.get_data(&params.projectile_z, &params.projectile_a) {
-        Some(data) => data,
-        None => return None,
-    };
-    let ejectile = match nuc_map.get_data(&params.ejectile_z, &params.ejectile_a) {
-        Some(data) => data,
-        None => return None,
-    };
-    let residual = match nuc_map.get_data(&params.get_residual_z(), &params.get_residual_a()) {
-        Some(data) => data,
-        None => return None,
-    };
+
+    let projectile = nuc_map.get_data(&params.projectile_z, &params.projectile_a)?;
+    info!("Projectile: {:?}", projectile);
+
+    let ejectile = nuc_map.get_data(&params.ejectile_z, &params.ejectile_a)?;
+    info!("Ejectile: {:?}", ejectile);
+
+    let residual = nuc_map.get_data(&params.get_residual_z(), &params.get_residual_a())?;
+    info!("Residual: {:?}", residual);
 
     let angle_rads = params.sps_angle.to_radians();
     let q_val = target.mass + projectile.mass - ejectile.mass - residual.mass;
@@ -150,10 +143,7 @@ fn calculate_z_offset(params: &KineParameters, nuc_map: &MassMap) -> Option<f64>
 //Calculate weights for correcting focal plane position for kinematic shift
 //Returns tuple of weights where should be used like xavg = x1 * result.0 + x2 * result.1
 pub fn calculate_weights(params: &KineParameters, nuc_map: &MassMap) -> Option<(f64, f64)> {
-    let z_offset = match calculate_z_offset(params, nuc_map) {
-        Some(z) => z,
-        None => return None,
-    };
+    let z_offset = calculate_z_offset(params, nuc_map)?;
     let w1 = 0.5 - z_offset / SPS_DETECTOR_WIRE_DIST;
     let w2 = 1.0 - w1;
     Some((w1, w2))
