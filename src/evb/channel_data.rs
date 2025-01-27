@@ -96,15 +96,15 @@ pub enum ChannelDataField {
     PIPS300Energy,
     PIPS100Energy,
 
-    PIPS1000Short,
-    PIPS500Short,
-    PIPS300Short,
-    PIPS100Short,
-
     PIPS1000Time,
     PIPS500Time,
     PIPS300Time,
     PIPS100Time,
+
+    PIPS1000RelTime,
+    PIPS500RelTime,
+    PIPS300RelTime,
+    PIPS100RelTime,
 
     CATRINA0Energy,
     CATRINA1Energy,
@@ -282,28 +282,36 @@ impl ChannelDataField {
                             && channel_map.contains_channel_type(ChannelType::ScintLeft)
                     }
 
-                    ChannelDataField::PIPS1000Energy
-                    | ChannelDataField::PIPS1000Short
-                    | ChannelDataField::PIPS1000Time => {
+                    ChannelDataField::PIPS1000Energy | ChannelDataField::PIPS1000Time => {
                         channel_map.contains_channel_type(ChannelType::PIPS1000)
                     }
+                    ChannelDataField::PIPS1000RelTime => {
+                        channel_map.contains_channel_type(ChannelType::PIPS1000)
+                            && channel_map.contains_channel_type(ChannelType::ScintLeft)
+                    }
 
-                    ChannelDataField::PIPS500Energy
-                    | ChannelDataField::PIPS500Short
-                    | ChannelDataField::PIPS500Time => {
+                    ChannelDataField::PIPS500Energy | ChannelDataField::PIPS500Time => {
                         channel_map.contains_channel_type(ChannelType::PIPS500)
                     }
-
-                    ChannelDataField::PIPS300Energy
-                    | ChannelDataField::PIPS300Short
-                    | ChannelDataField::PIPS300Time => {
-                        channel_map.contains_channel_type(ChannelType::PIPS300)
+                    ChannelDataField::PIPS500RelTime => {
+                        channel_map.contains_channel_type(ChannelType::PIPS500)
+                            && channel_map.contains_channel_type(ChannelType::ScintLeft)
                     }
 
-                    ChannelDataField::PIPS100Energy
-                    | ChannelDataField::PIPS100Short
-                    | ChannelDataField::PIPS100Time => {
+                    ChannelDataField::PIPS300Energy | ChannelDataField::PIPS300Time => {
+                        channel_map.contains_channel_type(ChannelType::PIPS300)
+                    }
+                    ChannelDataField::PIPS300RelTime => {
+                        channel_map.contains_channel_type(ChannelType::PIPS300)
+                            && channel_map.contains_channel_type(ChannelType::ScintLeft)
+                    }
+
+                    ChannelDataField::PIPS100Energy | ChannelDataField::PIPS100Time => {
                         channel_map.contains_channel_type(ChannelType::PIPS100)
+                    }
+                    ChannelDataField::PIPS100RelTime => {
+                        channel_map.contains_channel_type(ChannelType::PIPS100)
+                            && channel_map.contains_channel_type(ChannelType::ScintLeft)
                     }
 
                     ChannelDataField::CATRINA0Energy
@@ -432,9 +440,10 @@ impl ChannelData {
         let mut dbl_time = INVALID_VALUE;
         let mut dbr_time = INVALID_VALUE;
 
-        // for cebra relative time
         let mut scint_left_time = INVALID_VALUE;
         let mut anode_back_time = INVALID_VALUE;
+
+        // for cebra relative time
         let mut cebra0_time = INVALID_VALUE;
         let mut cebra1_time = INVALID_VALUE;
         let mut cebra2_time = INVALID_VALUE;
@@ -444,6 +453,12 @@ impl ChannelData {
         let mut cebra6_time = INVALID_VALUE;
         let mut cebra7_time = INVALID_VALUE;
         let mut cebra8_time = INVALID_VALUE;
+
+        // for pips relative time
+        let mut pips1000_time = INVALID_VALUE;
+        let mut pips500_time = INVALID_VALUE;
+        let mut pips300_time = INVALID_VALUE;
+        let mut pips100_time = INVALID_VALUE;
 
         for hit in event.iter() {
             //Fill out detector fields using channel map
@@ -577,26 +592,26 @@ impl ChannelData {
 
                 ChannelType::PIPS1000 => {
                     self.set_value(&ChannelDataField::PIPS1000Energy, hit.energy);
-                    self.set_value(&ChannelDataField::PIPS1000Short, hit.energy_short);
                     self.set_value(&ChannelDataField::PIPS1000Time, hit.timestamp);
+                    pips1000_time = hit.timestamp;
                 }
 
                 ChannelType::PIPS500 => {
                     self.set_value(&ChannelDataField::PIPS500Energy, hit.energy);
-                    self.set_value(&ChannelDataField::PIPS500Short, hit.energy_short);
                     self.set_value(&ChannelDataField::PIPS500Time, hit.timestamp);
+                    pips500_time = hit.timestamp;
                 }
 
                 ChannelType::PIPS300 => {
                     self.set_value(&ChannelDataField::PIPS300Energy, hit.energy);
-                    self.set_value(&ChannelDataField::PIPS300Short, hit.energy_short);
                     self.set_value(&ChannelDataField::PIPS300Time, hit.timestamp);
+                    pips300_time = hit.timestamp;
                 }
 
                 ChannelType::PIPS100 => {
                     self.set_value(&ChannelDataField::PIPS100Energy, hit.energy);
-                    self.set_value(&ChannelDataField::PIPS100Short, hit.energy_short);
                     self.set_value(&ChannelDataField::PIPS100Time, hit.timestamp);
+                    pips100_time = hit.timestamp;
                 }
 
                 ChannelType::CATRINA0 => {
@@ -735,6 +750,34 @@ impl ChannelData {
                 self.set_value(
                     &ChannelDataField::Cebra8RelTime,
                     cebra8_time - scint_left_time,
+                );
+            }
+
+            if pips1000_time != INVALID_VALUE {
+                self.set_value(
+                    &ChannelDataField::PIPS1000RelTime,
+                    pips1000_time - scint_left_time,
+                );
+            }
+
+            if pips500_time != INVALID_VALUE {
+                self.set_value(
+                    &ChannelDataField::PIPS500RelTime,
+                    pips500_time - scint_left_time,
+                );
+            }
+
+            if pips300_time != INVALID_VALUE {
+                self.set_value(
+                    &ChannelDataField::PIPS300RelTime,
+                    pips300_time - scint_left_time,
+                );
+            }
+
+            if pips100_time != INVALID_VALUE {
+                self.set_value(
+                    &ChannelDataField::PIPS100RelTime,
+                    pips100_time - scint_left_time,
                 );
             }
         }
