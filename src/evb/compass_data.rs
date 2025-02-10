@@ -55,15 +55,15 @@ pub struct CompassData {
 
 impl CompassData {
     pub fn new(raw: &RawCompassData, shifts: &Option<ShiftMap>) -> Self {
-        let mut rng = rand::thread_rng();
+        let mut rng = rand::rng();
         let board = raw.board as u32;
         let channel = raw.channel as u32;
         let id = generate_board_channel_uuid(&board, &channel);
         log::debug!("Board: {}, Channel: {}, UUID: {}", board, channel, id);
         CompassData {
             uuid: id,
-            energy: raw.energy as f64 + rng.gen::<f64>(),
-            energy_short: raw.energy_short as f64 + rng.gen::<f64>(),
+            energy: raw.energy as f64 + rng.random::<f64>(),
+            energy_short: raw.energy_short as f64 + rng.random::<f64>(),
             timestamp: match shifts {
                 Some(map) => raw.timestamp as f64 * 1.0e-3 + map.get_timeshift(&id),
                 None => raw.timestamp as f64 * 1.0e-3,
