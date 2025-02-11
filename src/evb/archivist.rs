@@ -1,7 +1,11 @@
 use std::path::PathBuf;
 use std::process::Command;
+use std::sync::{
+    atomic::{AtomicBool, Ordering},
+    Arc,
+};
 
-#[derive(serde::Deserialize, serde::Serialize, Debug)]
+#[derive(serde::Deserialize, serde::Serialize, Debug, Clone)]
 pub struct SSH {
     pub enabled: bool,
     pub user: String,
@@ -20,7 +24,7 @@ impl Default for SSH {
     }
 }
 
-#[derive(serde::Deserialize, serde::Serialize, Debug, Default)]
+#[derive(serde::Deserialize, serde::Serialize, Debug, Default, Clone)]
 pub struct Archivist {
     pub compass_path: String,
     pub output_path: String,
@@ -28,6 +32,8 @@ pub struct Archivist {
     pub max_run: u32,
     pub multiple_runs: bool,
     pub ssh: SSH,
+    #[serde(skip)]
+    pub is_archiving: Arc<AtomicBool>,
 }
 
 impl Archivist {
@@ -193,6 +199,8 @@ impl Archivist {
         } else {
             self.run_archive(self.min_run);
         }
+
+        println!("\nArchiving completed.\n");
     }
 
     pub fn ui(&mut self, ui: &mut egui::Ui) {
@@ -245,8 +253,33 @@ impl Archivist {
             ui.checkbox(&mut self.multiple_runs, "Multiple runs");
         });
 
-        if ui.button("Archive").clicked() {
-            self.archive();
-        }
+        // if ui.button("Archive").clicked() {
+        //     self.archive();
+        // }
+
+        ui.horizontal(|ui| {
+            if ui
+                .add_enabled(
+                    !self.is_archiving.load(Ordering::Relaxed),
+                    egui::Button::new("Archive"),
+                )
+                .clicked()
+            {
+                let archivist_clone = self.clone();
+                let is_archiving = Arc::clone(&self.is_archiving);
+
+                is_archiving.store(true, Ordering::Relaxed);
+
+                std::thread::spawn(move || {
+                    archivist_clone.archive();
+                    is_archiving.store(false, Ordering::Relaxed);
+                });
+            }
+
+            if self.is_archiving.load(Ordering::Relaxed) {
+                ui.label("Archiving...");
+                ui.add(egui::Spinner::new());
+            }
+        });
     }
 }
