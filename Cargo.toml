@@ -14,16 +14,16 @@ eframe = { version = "0.31", default-features = false, features = [
     "x11",       # To support Linux (and CI) use x11 or wayland
     #"wayland",
 ] }
-log = "0.4.25"
+log = "0.4.26"
 
 # You only need serde if you want app persistence:
-serde = { version = "1.0.217", features = ["derive"] }
+serde = { version = "1.0.218", features = ["derive"] }
 
 # native:
 [target.'cfg(not(target_arch = "wasm32"))'.dependencies]
 env_logger = "0.11.6"
-strum = "0.27.0"
-strum_macros = "0.27.0"
+strum = "0.27.1"
+strum_macros = "0.27.1"
 rand = "0.9.0"
 bitflags = "2.8"
 nom = "8.0.0"
