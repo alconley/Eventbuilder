@@ -31,6 +31,7 @@ struct EvbAppParams {
     pub channel_map_entries: Vec<Board>,
     pub shift_map_entries: Vec<ShiftMapEntry>,
     pub scaler_list_entries: Vec<ScalerEntryUI>,
+    pub multiple_runs: bool,
 }
 
 impl Default for EvbAppParams {
@@ -44,6 +45,7 @@ impl Default for EvbAppParams {
             channel_map_entries: Vec::new(),
             shift_map_entries: Vec::new(),
             scaler_list_entries: Vec::new(),
+            multiple_runs: false,
         }
     }
 }
@@ -102,6 +104,10 @@ impl EVBApp {
     }
 
     fn check_and_startup_processing_thread(&mut self) -> Result<(), WorkspaceError> {
+        if !self.parameters.multiple_runs {
+            self.parameters.run_max = self.parameters.run_min;
+        }
+
         if self.thread_handle.is_none()
             && self.parameters.workspace.is_some()
             && !self.parameters.channel_map_entries.is_empty()
@@ -247,12 +253,25 @@ impl EVBApp {
             );
             ui.end_row();
 
-            ui.label("Run Min");
-            ui.add(egui::widgets::DragValue::new(&mut self.parameters.run_min).speed(1));
+            ui.checkbox(&mut self.parameters.multiple_runs, "Multiple Runs");
+            ui.label("Run Range:");
             ui.end_row();
 
-            ui.label("Run Max");
-            ui.add(egui::widgets::DragValue::new(&mut self.parameters.run_max).speed(1));
+            ui.label("");
+            ui.add(egui::widgets::DragValue::new(&mut self.parameters.run_min).speed(1));
+            ui.add_enabled(
+                self.parameters.multiple_runs,
+                egui::widgets::DragValue::new(&mut self.parameters.run_max).speed(1),
+            );
+            ui.end_row();
+
+            if self.parameters.run_max < self.parameters.run_min {
+                self.parameters.run_max = self.parameters.run_min;
+            } else if self.parameters.run_min > self.parameters.run_max {
+                self.parameters.run_min = self.parameters.run_max;
+            } else if !self.parameters.multiple_runs {
+                self.parameters.run_max = self.parameters.run_min;
+            }
         });
     }
 
