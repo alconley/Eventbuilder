@@ -48,9 +48,8 @@ pub enum ChannelDataField {
     X2,
     Xavg,
     Theta,
-    X,
-    Z,
-
+    // X,
+    // Z,
     Cebra0Energy,
     Cebra1Energy,
     Cebra2Energy,
@@ -142,8 +141,8 @@ impl ChannelDataField {
                     ChannelDataField::X1
                     | ChannelDataField::X2
                     | ChannelDataField::Xavg
-                    | ChannelDataField::X
-                    | ChannelDataField::Z
+                    // | ChannelDataField::X
+                    // | ChannelDataField::Z
                     | ChannelDataField::Theta => all_delay_lines_present,
                     // Filter other fields based on the channel map
                     ChannelDataField::AnodeFrontEnergy
@@ -385,11 +384,11 @@ impl ChannelData {
             rows: 0,
         };
         fields.into_iter().for_each(|f| {
-            if f == ChannelDataField::X || f == ChannelDataField::Z {
-                data.nested_fields.insert(f, vec![vec![]]);
-            } else {
-                data.fields.insert(f, vec![]);
-            }
+            // if f == ChannelDataField::X || f == ChannelDataField::Z {
+            //     data.nested_fields.insert(f, vec![vec![]]);
+            // } else {
+            data.fields.insert(f, vec![]);
+            // }
         });
         data
     }
@@ -676,17 +675,17 @@ impl ChannelData {
                 None => self.set_value(&ChannelDataField::Xavg, INVALID_VALUE),
             };
 
-            let z_values: Vec<f64> = (0..400)
-                .map(|i| -50.0 + (100.0 / 400.0) * i as f64)
-                .collect();
+            // let z_values: Vec<f64> = (0..400)
+            //     .map(|i| -50.0 + (100.0 / 400.0) * i as f64)
+            //     .collect();
 
-            let x_values: Vec<f64> = z_values
-                .iter()
-                .map(|&z| (z / 42.8625 + 0.5) * (x2 - x1) + x1)
-                .collect();
+            // let x_values: Vec<f64> = z_values
+            //     .iter()
+            //     .map(|&z| (z / 42.8625 + 0.5) * (x2 - x1) + x1)
+            //     .collect();
 
-            self.set_nested_values(&ChannelDataField::X, x_values);
-            self.set_nested_values(&ChannelDataField::Z, z_values);
+            // self.set_nested_values(&ChannelDataField::X, x_values);
+            // self.set_nested_values(&ChannelDataField::Z, z_values);
         }
 
         if scint_left_time != INVALID_VALUE && anode_back_time != INVALID_VALUE {
