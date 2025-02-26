@@ -419,7 +419,7 @@ impl ChannelData {
         }
     }
 
-    fn set_nested_values(&mut self, field: &ChannelDataField, values: Vec<f64>) {
+    fn _set_nested_values(&mut self, field: &ChannelDataField, values: Vec<f64>) {
         if let Some(nested) = self.nested_fields.get_mut(field) {
             nested.push(values);
         }
