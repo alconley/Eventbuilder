@@ -105,6 +105,9 @@ pub enum ChannelDataField {
     PIPS300RelTime,
     PIPS100RelTime,
 
+    PIPS1000RelTimeToPIPS500,
+    PIPS1000RelTimeToPIPS300,
+
     CATRINA0Energy,
     CATRINA1Energy,
     CATRINA2Energy,
@@ -288,7 +291,14 @@ impl ChannelDataField {
                         channel_map.contains_channel_type(ChannelType::PIPS1000)
                             && channel_map.contains_channel_type(ChannelType::ScintLeft)
                     }
-
+                    ChannelDataField::PIPS1000RelTimeToPIPS500 => {
+                        channel_map.contains_channel_type(ChannelType::PIPS1000)
+                            && channel_map.contains_channel_type(ChannelType::PIPS500)
+                    }
+                    ChannelDataField::PIPS1000RelTimeToPIPS300 => {
+                        channel_map.contains_channel_type(ChannelType::PIPS1000)
+                            && channel_map.contains_channel_type(ChannelType::PIPS300)
+                    }
                     ChannelDataField::PIPS500Energy | ChannelDataField::PIPS500Time => {
                         channel_map.contains_channel_type(ChannelType::PIPS500)
                     }
@@ -751,7 +761,9 @@ impl ChannelData {
                     cebra8_time - scint_left_time,
                 );
             }
+        }
 
+        if scint_left_time != INVALID_VALUE {
             if pips1000_time != INVALID_VALUE {
                 self.set_value(
                     &ChannelDataField::PIPS1000RelTime,
@@ -779,6 +791,20 @@ impl ChannelData {
                     pips100_time - scint_left_time,
                 );
             }
+        }
+
+        if pips1000_time != INVALID_VALUE && pips500_time != INVALID_VALUE {
+            self.set_value(
+                &ChannelDataField::PIPS1000RelTimeToPIPS500,
+                pips1000_time - pips500_time,
+            );
+        }
+
+        if pips1000_time != INVALID_VALUE && pips300_time != INVALID_VALUE {
+            self.set_value(
+                &ChannelDataField::PIPS1000RelTimeToPIPS300,
+                pips1000_time - pips300_time,
+            );
         }
     }
 
