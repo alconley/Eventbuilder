@@ -123,6 +123,8 @@ pub enum ChannelDataField {
     CATRINA0PSD,
     CATRINA1PSD,
     CATRINA2PSD,
+
+    RF,
 }
 
 impl ChannelDataField {
@@ -342,6 +344,10 @@ impl ChannelDataField {
                     | ChannelDataField::CATRINA2Time
                     | ChannelDataField::CATRINA2PSD => {
                         channel_map.contains_channel_type(ChannelType::CATRINA2)
+                    }
+
+                    ChannelDataField::RF => {
+                        channel_map.contains_channel_type(ChannelType::RF)
                     }
                 }
             })
@@ -651,6 +657,10 @@ impl ChannelData {
                     let short = hit.energy_short;
                     let psd = (long - short) / long;
                     self.set_value(&ChannelDataField::CATRINA2PSD, psd);
+                }
+
+                ChannelType::RF => {
+                    self.set_value(&ChannelDataField::RF, hit.timestamp);
                 }
                 _ => continue,
             }

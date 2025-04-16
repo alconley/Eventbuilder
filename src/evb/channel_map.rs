@@ -39,6 +39,8 @@ pub enum ChannelType {
     CATRINA1,
     CATRINA2,
 
+    RF,
+
     // make sure to update app.rs so the channel map combo box are updated
 
     //Invalid channel
@@ -174,6 +176,7 @@ impl Board {
                                 ChannelType::CATRINA0,
                                 ChannelType::CATRINA1,
                                 ChannelType::CATRINA2,
+                                ChannelType::RF,
                                 ChannelType::None,
                             ] {
                                 ui.selectable_value(channel_type, variant, variant.as_ref());
