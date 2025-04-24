@@ -277,7 +277,7 @@ impl EVBApp {
 
     fn kinematics_ui(&mut self, ui: &mut egui::Ui) {
         ui.label(
-            RichText::new("Kinematics")
+            RichText::new("SE-SPS Kinematics")
                 .color(Color32::LIGHT_BLUE)
                 .size(18.0),
         );
@@ -333,6 +333,12 @@ impl EVBApp {
             if ui.button("CeBrA").clicked() {
                 let id = self.parameters.channel_map_entries.len() as u32;
                 let board = Board::cebra(id);
+                self.parameters.channel_map_entries.push(board);
+            }
+
+            if ui.button("CATRINA").clicked() {
+                let id = self.parameters.channel_map_entries.len() as u32;
+                let board = Board::catrina(id);
                 self.parameters.channel_map_entries.push(board);
             }
         });
@@ -444,7 +450,7 @@ impl EVBApp {
                 if ui
                     .selectable_label(
                         matches!(self.active_tab, ActiveTab::Kinematics),
-                        "Kinematics",
+                        "SE-SPS Kinematics",
                     )
                     .clicked()
                 {

@@ -19,7 +19,7 @@ use super::shift_map::{ShiftMap, ShiftMapEntry};
 use super::used_size::UsedSize;
 
 //Maximum allowed size for a single dataframe: 8GB
-const MAX_USED_SIZE: usize = 8_000_000_000;
+const MAX_USED_SIZE: usize = 16_000_000_000;
 
 #[derive(Debug)]
 struct RunParams<'a> {

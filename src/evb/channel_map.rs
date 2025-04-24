@@ -38,6 +38,18 @@ pub enum ChannelType {
     CATRINA0,
     CATRINA1,
     CATRINA2,
+    CATRINA3,
+    CATRINA4,
+    CATRINA5,
+    CATRINA6,
+    CATRINA7,
+    CATRINA8,
+    CATRINA9,
+    CATRINA10,
+    CATRINA11,
+    CATRINA12,
+    CATRINA13,
+    CATRINA14,
 
     RF,
 
@@ -113,6 +125,28 @@ impl Board {
         Board { id, channels }
     }
 
+    pub fn catrina(id: u32) -> Board {
+        let channels = [
+            ChannelType::CATRINA0,
+            ChannelType::CATRINA1,
+            ChannelType::CATRINA2,
+            ChannelType::CATRINA3,
+            ChannelType::CATRINA4,
+            ChannelType::CATRINA5,
+            ChannelType::CATRINA6,
+            ChannelType::CATRINA7,
+            ChannelType::CATRINA8,
+            ChannelType::CATRINA9,
+            ChannelType::CATRINA10,
+            ChannelType::CATRINA11,
+            ChannelType::CATRINA12,
+            ChannelType::CATRINA13,
+            ChannelType::CATRINA14,
+            ChannelType::None,
+        ];
+        Board { id, channels }
+    }
+
     pub fn ui(&mut self, ui: &mut egui::Ui, board_idx: usize, on_remove: impl FnOnce()) {
         ui.vertical(|ui| {
             egui::Grid::new(format!("board_{}", board_idx))
@@ -176,6 +210,18 @@ impl Board {
                                 ChannelType::CATRINA0,
                                 ChannelType::CATRINA1,
                                 ChannelType::CATRINA2,
+                                ChannelType::CATRINA3,
+                                ChannelType::CATRINA4,
+                                ChannelType::CATRINA5,
+                                ChannelType::CATRINA6,
+                                ChannelType::CATRINA7,
+                                ChannelType::CATRINA8,
+                                ChannelType::CATRINA9,
+                                ChannelType::CATRINA10,
+                                ChannelType::CATRINA11,
+                                ChannelType::CATRINA12,
+                                ChannelType::CATRINA13,
+                                ChannelType::CATRINA14,
                                 ChannelType::RF,
                                 ChannelType::None,
                             ] {

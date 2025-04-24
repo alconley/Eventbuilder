@@ -111,18 +111,66 @@ pub enum ChannelDataField {
     CATRINA0Energy,
     CATRINA1Energy,
     CATRINA2Energy,
+    CATRINA3Energy,
+    CATRINA4Energy,
+    CATRINA5Energy,
+    CATRINA6Energy,
+    CATRINA7Energy,
+    CATRINA8Energy,
+    CATRINA9Energy,
+    CATRINA10Energy,
+    CATRINA11Energy,
+    CATRINA12Energy,
+    CATRINA13Energy,
+    CATRINA14Energy,
 
     CATRINA0Short,
     CATRINA1Short,
     CATRINA2Short,
+    CATRINA3Short,
+    CATRINA4Short,
+    CATRINA5Short,
+    CATRINA6Short,
+    CATRINA7Short,
+    CATRINA8Short,
+    CATRINA9Short,
+    CATRINA10Short,
+    CATRINA11Short,
+    CATRINA12Short,
+    CATRINA13Short,
+    CATRINA14Short,
 
     CATRINA0Time,
     CATRINA1Time,
     CATRINA2Time,
+    CATRINA3Time,
+    CATRINA4Time,
+    CATRINA5Time,
+    CATRINA6Time,
+    CATRINA7Time,
+    CATRINA8Time,
+    CATRINA9Time,
+    CATRINA10Time,
+    CATRINA11Time,
+    CATRINA12Time,
+    CATRINA13Time,
+    CATRINA14Time,
 
     CATRINA0PSD,
     CATRINA1PSD,
     CATRINA2PSD,
+    CATRINA3PSD,
+    CATRINA4PSD,
+    CATRINA5PSD,
+    CATRINA6PSD,
+    CATRINA7PSD,
+    CATRINA8PSD,
+    CATRINA9PSD,
+    CATRINA10PSD,
+    CATRINA11PSD,
+    CATRINA12PSD,
+    CATRINA13PSD,
+    CATRINA14PSD,
 
     RF,
 }
@@ -344,6 +392,90 @@ impl ChannelDataField {
                     | ChannelDataField::CATRINA2Time
                     | ChannelDataField::CATRINA2PSD => {
                         channel_map.contains_channel_type(ChannelType::CATRINA2)
+                    }
+
+                    ChannelDataField::CATRINA3Energy
+                    | ChannelDataField::CATRINA3Short
+                    | ChannelDataField::CATRINA3Time
+                    | ChannelDataField::CATRINA3PSD => {
+                        channel_map.contains_channel_type(ChannelType::CATRINA3)
+                    }
+
+                    ChannelDataField::CATRINA4Energy
+                    | ChannelDataField::CATRINA4Short
+                    | ChannelDataField::CATRINA4Time
+                    | ChannelDataField::CATRINA4PSD => {
+                        channel_map.contains_channel_type(ChannelType::CATRINA4)
+                    }
+
+                    ChannelDataField::CATRINA5Energy
+                    | ChannelDataField::CATRINA5Short
+                    | ChannelDataField::CATRINA5Time
+                    | ChannelDataField::CATRINA5PSD => {
+                        channel_map.contains_channel_type(ChannelType::CATRINA5)
+                    }
+
+                    ChannelDataField::CATRINA6Energy
+                    | ChannelDataField::CATRINA6Short
+                    | ChannelDataField::CATRINA6Time
+                    | ChannelDataField::CATRINA6PSD => {
+                        channel_map.contains_channel_type(ChannelType::CATRINA6)
+                    }
+
+                    ChannelDataField::CATRINA7Energy
+                    | ChannelDataField::CATRINA7Short
+                    | ChannelDataField::CATRINA7Time
+                    | ChannelDataField::CATRINA7PSD => {
+                        channel_map.contains_channel_type(ChannelType::CATRINA7)
+                    }
+
+                    ChannelDataField::CATRINA8Energy
+                    | ChannelDataField::CATRINA8Short
+                    | ChannelDataField::CATRINA8Time
+                    | ChannelDataField::CATRINA8PSD => {
+                        channel_map.contains_channel_type(ChannelType::CATRINA8)
+                    }
+
+                    ChannelDataField::CATRINA9Energy
+                    | ChannelDataField::CATRINA9Short
+                    | ChannelDataField::CATRINA9Time
+                    | ChannelDataField::CATRINA9PSD => {
+                        channel_map.contains_channel_type(ChannelType::CATRINA9)
+                    }
+
+                    ChannelDataField::CATRINA10Energy
+                    | ChannelDataField::CATRINA10Short
+                    | ChannelDataField::CATRINA10Time
+                    | ChannelDataField::CATRINA10PSD => {
+                        channel_map.contains_channel_type(ChannelType::CATRINA10)
+                    }
+
+                    ChannelDataField::CATRINA11Energy
+                    | ChannelDataField::CATRINA11Short
+                    | ChannelDataField::CATRINA11Time
+                    | ChannelDataField::CATRINA11PSD => {
+                        channel_map.contains_channel_type(ChannelType::CATRINA11)
+                    }
+
+                    ChannelDataField::CATRINA12Energy
+                    | ChannelDataField::CATRINA12Short
+                    | ChannelDataField::CATRINA12Time
+                    | ChannelDataField::CATRINA12PSD => {
+                        channel_map.contains_channel_type(ChannelType::CATRINA12)
+                    }
+
+                    ChannelDataField::CATRINA13Energy
+                    | ChannelDataField::CATRINA13Short
+                    | ChannelDataField::CATRINA13Time
+                    | ChannelDataField::CATRINA13PSD => {
+                        channel_map.contains_channel_type(ChannelType::CATRINA13)
+                    }
+
+                    ChannelDataField::CATRINA14Energy
+                    | ChannelDataField::CATRINA14Short
+                    | ChannelDataField::CATRINA14Time
+                    | ChannelDataField::CATRINA14PSD => {
+                        channel_map.contains_channel_type(ChannelType::CATRINA14)
                     }
 
                     ChannelDataField::RF => {
@@ -657,6 +789,126 @@ impl ChannelData {
                     let short = hit.energy_short;
                     let psd = (long - short) / long;
                     self.set_value(&ChannelDataField::CATRINA2PSD, psd);
+                }
+
+                ChannelType::CATRINA3 => {
+                    self.set_value(&ChannelDataField::CATRINA3Energy, hit.energy);
+                    self.set_value(&ChannelDataField::CATRINA3Short, hit.energy_short);
+                    self.set_value(&ChannelDataField::CATRINA3Time, hit.timestamp);
+                    let long = hit.energy;
+                    let short = hit.energy_short;
+                    let psd = (long - short) / long;
+                    self.set_value(&ChannelDataField::CATRINA3PSD, psd);
+                }
+
+                ChannelType::CATRINA4 => {
+                    self.set_value(&ChannelDataField::CATRINA4Energy, hit.energy);
+                    self.set_value(&ChannelDataField::CATRINA4Short, hit.energy_short);
+                    self.set_value(&ChannelDataField::CATRINA4Time, hit.timestamp);
+                    let long = hit.energy;
+                    let short = hit.energy_short;
+                    let psd = (long - short) / long;
+                    self.set_value(&ChannelDataField::CATRINA4PSD, psd);
+                }
+
+                ChannelType::CATRINA5 => {
+                    self.set_value(&ChannelDataField::CATRINA5Energy, hit.energy);
+                    self.set_value(&ChannelDataField::CATRINA5Short, hit.energy_short);
+                    self.set_value(&ChannelDataField::CATRINA5Time, hit.timestamp);
+                    let long = hit.energy;
+                    let short = hit.energy_short;
+                    let psd = (long - short) / long;
+                    self.set_value(&ChannelDataField::CATRINA5PSD, psd);
+                }
+
+                ChannelType::CATRINA6 => {
+                    self.set_value(&ChannelDataField::CATRINA6Energy, hit.energy);
+                    self.set_value(&ChannelDataField::CATRINA6Short, hit.energy_short);
+                    self.set_value(&ChannelDataField::CATRINA6Time, hit.timestamp);
+                    let long = hit.energy;
+                    let short = hit.energy_short;
+                    let psd = (long - short) / long;
+                    self.set_value(&ChannelDataField::CATRINA6PSD, psd);
+                }
+
+                ChannelType::CATRINA7 => {
+                    self.set_value(&ChannelDataField::CATRINA7Energy, hit.energy);
+                    self.set_value(&ChannelDataField::CATRINA7Short, hit.energy_short);
+                    self.set_value(&ChannelDataField::CATRINA7Time, hit.timestamp);
+                    let long = hit.energy;
+                    let short = hit.energy_short;
+                    let psd = (long - short) / long;
+                    self.set_value(&ChannelDataField::CATRINA7PSD, psd);
+                }
+
+                ChannelType::CATRINA8 => {
+                    self.set_value(&ChannelDataField::CATRINA8Energy, hit.energy);
+                    self.set_value(&ChannelDataField::CATRINA8Short, hit.energy_short);
+                    self.set_value(&ChannelDataField::CATRINA8Time, hit.timestamp);
+                    let long = hit.energy;
+                    let short = hit.energy_short;
+                    let psd = (long - short) / long;
+                    self.set_value(&ChannelDataField::CATRINA8PSD, psd);
+                }
+
+                ChannelType::CATRINA9 => {
+                    self.set_value(&ChannelDataField::CATRINA9Energy, hit.energy);
+                    self.set_value(&ChannelDataField::CATRINA9Short, hit.energy_short);
+                    self.set_value(&ChannelDataField::CATRINA9Time, hit.timestamp);
+                    let long = hit.energy;
+                    let short = hit.energy_short;
+                    let psd = (long - short) / long;
+                    self.set_value(&ChannelDataField::CATRINA9PSD, psd);
+                }
+
+                ChannelType::CATRINA10 => {
+                    self.set_value(&ChannelDataField::CATRINA10Energy, hit.energy);
+                    self.set_value(&ChannelDataField::CATRINA10Short, hit.energy_short);
+                    self.set_value(&ChannelDataField::CATRINA10Time, hit.timestamp);
+                    let long = hit.energy;
+                    let short = hit.energy_short;
+                    let psd = (long - short) / long;
+                    self.set_value(&ChannelDataField::CATRINA10PSD, psd);
+                }
+
+                ChannelType::CATRINA11 => {
+                    self.set_value(&ChannelDataField::CATRINA11Energy, hit.energy);
+                    self.set_value(&ChannelDataField::CATRINA11Short, hit.energy_short);
+                    self.set_value(&ChannelDataField::CATRINA11Time, hit.timestamp);
+                    let long = hit.energy;
+                    let short = hit.energy_short;
+                    let psd = (long - short) / long;
+                    self.set_value(&ChannelDataField::CATRINA11PSD, psd);
+                }
+
+                ChannelType::CATRINA12 => {
+                    self.set_value(&ChannelDataField::CATRINA12Energy, hit.energy);
+                    self.set_value(&ChannelDataField::CATRINA12Short, hit.energy_short);
+                    self.set_value(&ChannelDataField::CATRINA12Time, hit.timestamp);
+                    let long = hit.energy;
+                    let short = hit.energy_short;
+                    let psd = (long - short) / long;
+                    self.set_value(&ChannelDataField::CATRINA12PSD, psd);
+                }
+
+                ChannelType::CATRINA13 => {
+                    self.set_value(&ChannelDataField::CATRINA13Energy, hit.energy);
+                    self.set_value(&ChannelDataField::CATRINA13Short, hit.energy_short);
+                    self.set_value(&ChannelDataField::CATRINA13Time, hit.timestamp);
+                    let long = hit.energy;
+                    let short = hit.energy_short;
+                    let psd = (long - short) / long;
+                    self.set_value(&ChannelDataField::CATRINA13PSD, psd);
+                }
+
+                ChannelType::CATRINA14 => {
+                    self.set_value(&ChannelDataField::CATRINA14Energy, hit.energy);
+                    self.set_value(&ChannelDataField::CATRINA14Short, hit.energy_short);
+                    self.set_value(&ChannelDataField::CATRINA14Time, hit.timestamp);
+                    let long = hit.energy;
+                    let short = hit.energy_short;
+                    let psd = (long - short) / long;
+                    self.set_value(&ChannelDataField::CATRINA14PSD, psd);
                 }
 
                 ChannelType::RF => {
