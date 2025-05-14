@@ -72,3 +72,38 @@ Currently max file size is defined in `src/compass_run.rs` as a constant. Eventu
 ### Configuration saving
 
 The File menu has options for saving and loading configurations. Configurations are stored as YAML files (using the serde and serde_yaml crates), which are human readable and editable.
+
+---
+
+## Conversion to ROOT Tree
+
+The script `parquet2root.py` provides a lightweight way to convert one or more Parquet files into a single ROOT file containing a TTree. It does so **without loading the full dataset into memory**, making it ideal for large-scale data from event building.
+
+#### 📦 Requirements
+
+To use this script, install the following Python packages:
+
+    pip install pyarrow uproot tqdm numpy
+
+#### ▶️ Usage & Example
+
+    python3 parquet2root.py <input_glob> <output.root> <tree_name> [batch_size]
+
+Example:
+
+    python3 parquet2root.py "built/run_1.parquet" output.root Tree
+
+---
+
+#### 📝 Notes
+
+- The script uses **streaming conversion**, so memory usage remains low even for large datasets.
+- Progress is tracked using `tqdm`, with updates per batch.
+- The script processes files in **sorted order**—ensure filenames are lexically sortable if order matters.
+- The script prints the final ROOT file size after conversion completes.
+
+---
+
+#### 🐍 Script Location
+
+    etc/parquet2root.py
