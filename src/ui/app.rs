@@ -341,6 +341,18 @@ impl EVBApp {
                 let board = Board::catrina(id);
                 self.parameters.channel_map_entries.push(board);
             }
+
+            if ui.button("Left Strip").clicked() {
+                let id = self.parameters.channel_map_entries.len() as u32;
+                let board = Board::left_strip(id);
+                self.parameters.channel_map_entries.push(board);
+            }
+
+            if ui.button("Right Strip").clicked() {
+                let id = self.parameters.channel_map_entries.len() as u32;
+                let board = Board::right_strip(id);
+                self.parameters.channel_map_entries.push(board);
+            }
         });
 
         ui.add_space(1.0);

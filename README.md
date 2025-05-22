@@ -17,7 +17,7 @@ On Fedora Rawhide you need to run:
 
 ## EventBuilder
 
-This eventbuilder was modified from [spsevb](https://github.com/gwm17/spsevb). This eventbuilder is currenlty designed to be used with the [SE-SPS](https://fsunuc.physics.fsu.edu/wiki/index.php/Split-Pole_Spectrograph) and/or [CeBrA](https://www.sciencedirect.com/science/article/abs/pii/S0168900223008185).
+This eventbuilder was modified from [spsevb](https://github.com/gwm17/spsevb). This eventbuilder is currenlty designed to be used with the [SE-SPS](https://fsunuc.physics.fsu.edu/wiki/index.php/Split-Pole_Spectrograph), [CeBrA](https://www.sciencedirect.com/science/article/abs/pii/S0168900223008185), [CATRiNA](https://fsunuc.physics.fsu.edu/wiki/index.php/CATRiNA), and more. 
 
 This modified eventbuilder version only writes columns that are present in the channel map as well as an updated UI. 
 

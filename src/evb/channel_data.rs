@@ -123,6 +123,7 @@ pub enum ChannelDataField {
     CATRINA12Energy,
     CATRINA13Energy,
     CATRINA14Energy,
+    CATRINA15Energy,
 
     CATRINA0Short,
     CATRINA1Short,
@@ -139,6 +140,7 @@ pub enum ChannelDataField {
     CATRINA12Short,
     CATRINA13Short,
     CATRINA14Short,
+    CATRINA15Short,
 
     CATRINA0Time,
     CATRINA1Time,
@@ -155,6 +157,7 @@ pub enum ChannelDataField {
     CATRINA12Time,
     CATRINA13Time,
     CATRINA14Time,
+    CATRINA15Time,
 
     CATRINA0PSD,
     CATRINA1PSD,
@@ -171,6 +174,81 @@ pub enum ChannelDataField {
     CATRINA12PSD,
     CATRINA13PSD,
     CATRINA14PSD,
+    CATRINA15PSD,
+
+    LeftStrip0Energy,
+    LeftStrip1Energy,
+    LeftStrip2Energy,
+    LeftStrip3Energy,
+    LeftStrip4Energy,
+    LeftStrip5Energy,
+    LeftStrip6Energy,
+    LeftStrip7Energy,
+    LeftStrip8Energy,
+    LeftStrip9Energy,
+    LeftStrip10Energy,
+    LeftStrip11Energy,
+    LeftStrip12Energy,
+    LeftStrip13Energy,
+    LeftStrip14Energy,
+    LeftStrip15Energy,
+
+    LeftStrip0Time,
+    LeftStrip1Time,
+    LeftStrip2Time,
+    LeftStrip3Time,
+    LeftStrip4Time,
+    LeftStrip5Time,
+    LeftStrip6Time,
+    LeftStrip7Time,
+    LeftStrip8Time,
+    LeftStrip9Time,
+    LeftStrip10Time,
+    LeftStrip11Time,
+    LeftStrip12Time,
+    LeftStrip13Time,
+    LeftStrip14Time,
+    LeftStrip15Time,
+
+    RightStrip0Energy,
+    RightStrip1Energy,
+    RightStrip2Energy,
+    RightStrip3Energy,
+    RightStrip4Energy,
+    RightStrip5Energy,
+    RightStrip6Energy,
+    RightStrip7Energy,
+    RightStrip8Energy,
+    RightStrip9Energy,
+    RightStrip10Energy,
+    RightStrip11Energy,
+    RightStrip12Energy,
+    RightStrip13Energy,
+    RightStrip14Energy,
+    RightStrip15Energy,
+
+    RightStrip0Time,
+    RightStrip1Time,
+    RightStrip2Time,
+    RightStrip3Time,
+    RightStrip4Time,
+    RightStrip5Time,
+    RightStrip6Time,
+    RightStrip7Time,
+    RightStrip8Time,
+    RightStrip9Time,
+    RightStrip10Time,
+    RightStrip11Time,
+    RightStrip12Time,
+    RightStrip13Time,
+    RightStrip14Time,
+    RightStrip15Time,
+
+    Strip0Energy,
+    Strip17Energy,
+
+    Strip0Time,
+    Strip17Time,
 
     RF,
 }
@@ -478,9 +556,185 @@ impl ChannelDataField {
                         channel_map.contains_channel_type(ChannelType::CATRINA14)
                     }
 
+                    ChannelDataField::CATRINA15Energy
+                    | ChannelDataField::CATRINA15Short
+                    | ChannelDataField::CATRINA15Time
+                    | ChannelDataField::CATRINA15PSD => {
+                        channel_map.contains_channel_type(ChannelType::CATRINA15)
+                    }
+
                     ChannelDataField::RF => {
                         channel_map.contains_channel_type(ChannelType::RF)
                     }
+
+                    ChannelDataField::LeftStrip0Energy
+                    | ChannelDataField::LeftStrip0Time => {
+                        channel_map.contains_channel_type(ChannelType::LeftStrip0)
+                    }
+
+                    ChannelDataField::LeftStrip1Energy
+                    | ChannelDataField::LeftStrip1Time => {
+                        channel_map.contains_channel_type(ChannelType::LeftStrip1)
+                    }
+
+                    ChannelDataField::LeftStrip2Energy
+                    | ChannelDataField::LeftStrip2Time => {
+                        channel_map.contains_channel_type(ChannelType::LeftStrip2)
+                    }
+
+                    ChannelDataField::LeftStrip3Energy
+                    | ChannelDataField::LeftStrip3Time => {
+                        channel_map.contains_channel_type(ChannelType::LeftStrip3)
+                    }
+
+                    ChannelDataField::LeftStrip4Energy
+                    | ChannelDataField::LeftStrip4Time => {
+                        channel_map.contains_channel_type(ChannelType::LeftStrip4)
+                    }
+
+                    ChannelDataField::LeftStrip5Energy
+                    | ChannelDataField::LeftStrip5Time => {
+                        channel_map.contains_channel_type(ChannelType::LeftStrip5)
+                    }
+
+                    ChannelDataField::LeftStrip6Energy
+                    | ChannelDataField::LeftStrip6Time => {
+                        channel_map.contains_channel_type(ChannelType::LeftStrip6)
+                    }
+
+                    ChannelDataField::LeftStrip7Energy
+                    | ChannelDataField::LeftStrip7Time => {
+                        channel_map.contains_channel_type(ChannelType::LeftStrip7)
+                    }
+
+                    ChannelDataField::LeftStrip8Energy
+                    | ChannelDataField::LeftStrip8Time => {
+                        channel_map.contains_channel_type(ChannelType::LeftStrip8)
+                    }
+
+                    ChannelDataField::LeftStrip9Energy
+                    | ChannelDataField::LeftStrip9Time => {
+                        channel_map.contains_channel_type(ChannelType::LeftStrip9)
+                    }
+
+                    ChannelDataField::LeftStrip10Energy
+                    | ChannelDataField::LeftStrip10Time => {
+                        channel_map.contains_channel_type(ChannelType::LeftStrip10)
+                    }
+
+                    ChannelDataField::LeftStrip11Energy
+                    | ChannelDataField::LeftStrip11Time => {
+                        channel_map.contains_channel_type(ChannelType::LeftStrip11)
+                    }
+
+                    ChannelDataField::LeftStrip12Energy
+                    | ChannelDataField::LeftStrip12Time => {
+                        channel_map.contains_channel_type(ChannelType::LeftStrip12)
+                    }
+
+                    ChannelDataField::LeftStrip13Energy
+                    | ChannelDataField::LeftStrip13Time => {
+                        channel_map.contains_channel_type(ChannelType::LeftStrip13)
+                    }
+
+                    ChannelDataField::LeftStrip14Energy
+                    | ChannelDataField::LeftStrip14Time => {
+                        channel_map.contains_channel_type(ChannelType::LeftStrip14)
+                    }
+
+                    ChannelDataField::LeftStrip15Energy
+                    | ChannelDataField::LeftStrip15Time => {
+                        channel_map.contains_channel_type(ChannelType::LeftStrip15)
+                    }
+
+                    ChannelDataField::RightStrip0Energy
+                    | ChannelDataField::RightStrip0Time => {
+                        channel_map.contains_channel_type(ChannelType::RightStrip0)
+                    }
+
+                    ChannelDataField::RightStrip1Energy
+                    | ChannelDataField::RightStrip1Time => {
+                        channel_map.contains_channel_type(ChannelType::RightStrip1)
+                    }
+
+                    ChannelDataField::RightStrip2Energy
+                    | ChannelDataField::RightStrip2Time => {
+                        channel_map.contains_channel_type(ChannelType::RightStrip2)
+                    }
+
+                    ChannelDataField::RightStrip3Energy
+                    | ChannelDataField::RightStrip3Time => {
+                        channel_map.contains_channel_type(ChannelType::RightStrip3)
+                    }
+
+                    ChannelDataField::RightStrip4Energy
+                    | ChannelDataField::RightStrip4Time => {
+                        channel_map.contains_channel_type(ChannelType::RightStrip4)
+                    }
+
+                    ChannelDataField::RightStrip5Energy
+                    | ChannelDataField::RightStrip5Time => {
+                        channel_map.contains_channel_type(ChannelType::RightStrip5)
+                    }
+
+                    ChannelDataField::RightStrip6Energy
+                    | ChannelDataField::RightStrip6Time => {
+                        channel_map.contains_channel_type(ChannelType::RightStrip6)
+                    }
+
+                    ChannelDataField::RightStrip7Energy
+                    | ChannelDataField::RightStrip7Time => {
+                        channel_map.contains_channel_type(ChannelType::RightStrip7)
+                    }
+
+                    ChannelDataField::RightStrip8Energy
+                    | ChannelDataField::RightStrip8Time => {
+                        channel_map.contains_channel_type(ChannelType::RightStrip8)
+                    }
+
+                    ChannelDataField::RightStrip9Energy
+                    | ChannelDataField::RightStrip9Time => {
+                        channel_map.contains_channel_type(ChannelType::RightStrip9)
+                    }
+
+                    ChannelDataField::RightStrip10Energy
+                    | ChannelDataField::RightStrip10Time => {
+                        channel_map.contains_channel_type(ChannelType::RightStrip10)
+                    }
+
+                    ChannelDataField::RightStrip11Energy
+                    | ChannelDataField::RightStrip11Time => {
+                        channel_map.contains_channel_type(ChannelType::RightStrip11)
+                    }
+
+                    ChannelDataField::RightStrip12Energy
+                    | ChannelDataField::RightStrip12Time => {
+                        channel_map.contains_channel_type(ChannelType::RightStrip12)
+                    }
+
+                    ChannelDataField::RightStrip13Energy
+                    | ChannelDataField::RightStrip13Time => {
+                        channel_map.contains_channel_type(ChannelType::RightStrip13)
+                    }
+
+                    ChannelDataField::RightStrip14Energy
+                    | ChannelDataField::RightStrip14Time => {
+                        channel_map.contains_channel_type(ChannelType::RightStrip14)
+                    }
+
+                    ChannelDataField::RightStrip15Energy
+                    | ChannelDataField::RightStrip15Time => {
+                        channel_map.contains_channel_type(ChannelType::RightStrip15)
+                    }
+
+                    ChannelDataField::Strip0Energy | ChannelDataField::Strip0Time => {
+                        channel_map.contains_channel_type(ChannelType::Strip0)
+                    }
+
+                    ChannelDataField::Strip17Energy | ChannelDataField::Strip17Time => {
+                        channel_map.contains_channel_type(ChannelType::Strip17)
+                    }
+
                 }
             })
             .collect()
@@ -909,6 +1163,186 @@ impl ChannelData {
                     let short = hit.energy_short;
                     let psd = (long - short) / long;
                     self.set_value(&ChannelDataField::CATRINA14PSD, psd);
+                }
+
+                ChannelType::CATRINA15 => {
+                    self.set_value(&ChannelDataField::CATRINA15Energy, hit.energy);
+                    self.set_value(&ChannelDataField::CATRINA15Short, hit.energy_short);
+                    self.set_value(&ChannelDataField::CATRINA15Time, hit.timestamp);
+                    let long = hit.energy;
+                    let short = hit.energy_short;
+                    let psd = (long - short) / long;
+                    self.set_value(&ChannelDataField::CATRINA15PSD, psd);
+                }
+
+                ChannelType::LeftStrip0 => {
+                    self.set_value(&ChannelDataField::LeftStrip0Energy, hit.energy);
+                    self.set_value(&ChannelDataField::LeftStrip0Time, hit.timestamp);
+                }
+
+                ChannelType::LeftStrip1 => {
+                    self.set_value(&ChannelDataField::LeftStrip1Energy, hit.energy);
+                    self.set_value(&ChannelDataField::LeftStrip1Time, hit.timestamp);
+                }
+
+                ChannelType::LeftStrip2 => {
+                    self.set_value(&ChannelDataField::LeftStrip2Energy, hit.energy);
+                    self.set_value(&ChannelDataField::LeftStrip2Time, hit.timestamp);
+                }
+
+                ChannelType::LeftStrip3 => {
+                    self.set_value(&ChannelDataField::LeftStrip3Energy, hit.energy);
+                    self.set_value(&ChannelDataField::LeftStrip3Time, hit.timestamp);
+                }
+
+                ChannelType::LeftStrip4 => {
+                    self.set_value(&ChannelDataField::LeftStrip4Energy, hit.energy);
+                    self.set_value(&ChannelDataField::LeftStrip4Time, hit.timestamp);
+                }
+
+                ChannelType::LeftStrip5 => {
+                    self.set_value(&ChannelDataField::LeftStrip5Energy, hit.energy);
+                    self.set_value(&ChannelDataField::LeftStrip5Time, hit.timestamp);
+                }
+
+                ChannelType::LeftStrip6 => {
+                    self.set_value(&ChannelDataField::LeftStrip6Energy, hit.energy);
+                    self.set_value(&ChannelDataField::LeftStrip6Time, hit.timestamp);
+                }
+
+                ChannelType::LeftStrip7 => {
+                    self.set_value(&ChannelDataField::LeftStrip7Energy, hit.energy);
+                    self.set_value(&ChannelDataField::LeftStrip7Time, hit.timestamp);
+                }
+
+                ChannelType::LeftStrip8 => {
+                    self.set_value(&ChannelDataField::LeftStrip8Energy, hit.energy);
+                    self.set_value(&ChannelDataField::LeftStrip8Time, hit.timestamp);
+                }
+
+                ChannelType::LeftStrip9 => {
+                    self.set_value(&ChannelDataField::LeftStrip9Energy, hit.energy);
+                    self.set_value(&ChannelDataField::LeftStrip9Time, hit.timestamp);
+                }
+
+                ChannelType::LeftStrip10 => {
+                    self.set_value(&ChannelDataField::LeftStrip10Energy, hit.energy);
+                    self.set_value(&ChannelDataField::LeftStrip10Time, hit.timestamp);
+                }
+
+                ChannelType::LeftStrip11 => {
+                    self.set_value(&ChannelDataField::LeftStrip11Energy, hit.energy);
+                    self.set_value(&ChannelDataField::LeftStrip11Time, hit.timestamp);
+                }
+
+                ChannelType::LeftStrip12 => {
+                    self.set_value(&ChannelDataField::LeftStrip12Energy, hit.energy);
+                    self.set_value(&ChannelDataField::LeftStrip12Time, hit.timestamp);
+                }
+
+                ChannelType::LeftStrip13 => {
+                    self.set_value(&ChannelDataField::LeftStrip13Energy, hit.energy);
+                    self.set_value(&ChannelDataField::LeftStrip13Time, hit.timestamp);
+                }
+
+                ChannelType::LeftStrip14 => {
+                    self.set_value(&ChannelDataField::LeftStrip14Energy, hit.energy);
+                    self.set_value(&ChannelDataField::LeftStrip14Time, hit.timestamp);
+                }
+
+                ChannelType::LeftStrip15 => {
+                    self.set_value(&ChannelDataField::LeftStrip15Energy, hit.energy);
+                    self.set_value(&ChannelDataField::LeftStrip15Time, hit.timestamp);
+                }
+
+                ChannelType::RightStrip0 => {
+                    self.set_value(&ChannelDataField::RightStrip0Energy, hit.energy);
+                    self.set_value(&ChannelDataField::RightStrip0Time, hit.timestamp);
+                }
+
+                ChannelType::RightStrip1 => {
+                    self.set_value(&ChannelDataField::RightStrip1Energy, hit.energy);
+                    self.set_value(&ChannelDataField::RightStrip1Time, hit.timestamp);
+                }
+
+                ChannelType::RightStrip2 => {
+                    self.set_value(&ChannelDataField::RightStrip2Energy, hit.energy);
+                    self.set_value(&ChannelDataField::RightStrip2Time, hit.timestamp);
+                }
+
+                ChannelType::RightStrip3 => {
+                    self.set_value(&ChannelDataField::RightStrip3Energy, hit.energy);
+                    self.set_value(&ChannelDataField::RightStrip3Time, hit.timestamp);
+                }
+
+                ChannelType::RightStrip4 => {
+                    self.set_value(&ChannelDataField::RightStrip4Energy, hit.energy);
+                    self.set_value(&ChannelDataField::RightStrip4Time, hit.timestamp);
+                }
+
+                ChannelType::RightStrip5 => {
+                    self.set_value(&ChannelDataField::RightStrip5Energy, hit.energy);
+                    self.set_value(&ChannelDataField::RightStrip5Time, hit.timestamp);
+                }
+
+                ChannelType::RightStrip6 => {
+                    self.set_value(&ChannelDataField::RightStrip6Energy, hit.energy);
+                    self.set_value(&ChannelDataField::RightStrip6Time, hit.timestamp);
+                }
+
+                ChannelType::RightStrip7 => {
+                    self.set_value(&ChannelDataField::RightStrip7Energy, hit.energy);
+                    self.set_value(&ChannelDataField::RightStrip7Time, hit.timestamp);
+                }
+
+                ChannelType::RightStrip8 => {
+                    self.set_value(&ChannelDataField::RightStrip8Energy, hit.energy);
+                    self.set_value(&ChannelDataField::RightStrip8Time, hit.timestamp);
+                }
+
+                ChannelType::RightStrip9 => {
+                    self.set_value(&ChannelDataField::RightStrip9Energy, hit.energy);
+                    self.set_value(&ChannelDataField::RightStrip9Time, hit.timestamp);
+                }
+
+                ChannelType::RightStrip10 => {
+                    self.set_value(&ChannelDataField::RightStrip10Energy, hit.energy);
+                    self.set_value(&ChannelDataField::RightStrip10Time, hit.timestamp);
+                }
+
+                ChannelType::RightStrip11 => {
+                    self.set_value(&ChannelDataField::RightStrip11Energy, hit.energy);
+                    self.set_value(&ChannelDataField::RightStrip11Time, hit.timestamp);
+                }
+
+                ChannelType::RightStrip12 => {
+                    self.set_value(&ChannelDataField::RightStrip12Energy, hit.energy);
+                    self.set_value(&ChannelDataField::RightStrip12Time, hit.timestamp);
+                }
+
+                ChannelType::RightStrip13 => {
+                    self.set_value(&ChannelDataField::RightStrip13Energy, hit.energy);
+                    self.set_value(&ChannelDataField::RightStrip13Time, hit.timestamp);
+                }
+
+                ChannelType::RightStrip14 => {
+                    self.set_value(&ChannelDataField::RightStrip14Energy, hit.energy);
+                    self.set_value(&ChannelDataField::RightStrip14Time, hit.timestamp);
+                }
+
+                ChannelType::RightStrip15 => {
+                    self.set_value(&ChannelDataField::RightStrip15Energy, hit.energy);
+                    self.set_value(&ChannelDataField::RightStrip15Time, hit.timestamp);
+                }
+
+                ChannelType::Strip0 => {
+                    self.set_value(&ChannelDataField::Strip0Energy, hit.energy);
+                    self.set_value(&ChannelDataField::Strip0Time, hit.timestamp);
+                }
+
+                ChannelType::Strip17 => {
+                    self.set_value(&ChannelDataField::Strip17Energy, hit.energy);
+                    self.set_value(&ChannelDataField::Strip17Time, hit.timestamp);
                 }
 
                 ChannelType::RF => {
