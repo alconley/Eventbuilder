@@ -3,3 +3,5 @@
 .venv
 *.root
 *.parquet
+.DS_Store
+__pycache__
