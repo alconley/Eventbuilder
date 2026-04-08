@@ -1,6 +1,6 @@
 use super::shift_map::ShiftMap;
 use bitflags::bitflags;
-use rand::Rng;
+use rand::RngExt;
 
 bitflags! {
     #[derive(Debug)]

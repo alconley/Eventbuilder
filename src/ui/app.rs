@@ -59,21 +59,16 @@ impl Default for EvbAppParams {
     }
 }
 
-#[derive(Debug, PartialEq, Serialize, Deserialize)]
+#[derive(Debug, PartialEq, Serialize, Deserialize, Default)]
 enum ActiveTab {
     Archivist,
+    #[default]
     MainTab,
     Kinematics,
     FocalPlaneTilt, //JCE 2026
     ChannelMap,
     ShiftMap,
     ScalerList,
-}
-
-impl Default for ActiveTab {
-    fn default() -> Self {
-        Self::MainTab
-    }
 }
 
 #[derive(serde::Deserialize, serde::Serialize, Debug, Default)]
@@ -127,32 +122,17 @@ impl EVBApp {
             self.parameters.run_max = self.parameters.run_min;
         }
 
-        if self.thread_handle.is_none()
-            && self.parameters.workspace.is_some()
-            && !self.parameters.channel_map_entries.is_empty()
-        {
+        if self.thread_handle.is_none() && !self.parameters.channel_map_entries.is_empty() {
+            let Some(workspace) = self.parameters.workspace.as_ref() else {
+                return Ok(());
+            };
             let prog = self.progress.clone();
             let current_run = self.current_run.clone();
             let cancel_requested = self.cancel_requested.clone();
             let r_params = ProcessParams {
-                archive_dir: self
-                    .parameters
-                    .workspace
-                    .as_ref()
-                    .unwrap()
-                    .get_archive_dir()?,
-                unpack_dir: self
-                    .parameters
-                    .workspace
-                    .as_ref()
-                    .unwrap()
-                    .get_unpack_dir()?,
-                output_dir: self
-                    .parameters
-                    .workspace
-                    .as_ref()
-                    .unwrap()
-                    .get_output_dir()?,
+                archive_dir: workspace.get_archive_dir()?,
+                unpack_dir: workspace.get_unpack_dir()?,
+                output_dir: workspace.get_output_dir()?,
                 focal_plane_tilt: self.parameters.focal_plane_tilt.clone(), // JCE 2026
                 channel_map: self.parameters.channel_map_entries.clone(),
                 scaler_list: self.parameters.scaler_list_entries.clone(),
@@ -559,7 +539,7 @@ impl EVBApp {
     }
 
     fn ui_tabs(&mut self, ui: &mut egui::Ui) {
-        egui::TopBottomPanel::top("cebra_sps_top_panel").show_inside(ui, |ui| {
+        egui::Panel::top("cebra_sps_top_panel").show_inside(ui, |ui| {
             ui.horizontal_wrapped(|ui| {
                 if ui
                     .selectable_label(matches!(self.active_tab, ActiveTab::Archivist), "Archivist")
@@ -636,7 +616,7 @@ impl EVBApp {
         if self.active_tab == ActiveTab::Archivist {
             return;
         }
-        egui::TopBottomPanel::bottom("cebra_sps_bottom_panel").show_inside(ui, |ui| {
+        egui::Panel::bottom("cebra_sps_bottom_panel").show_inside(ui, |ui| {
             let is_running = self.thread_handle.is_some();
             let is_cancelling = self.cancel_requested.load(Ordering::Relaxed);
             let progress = match self.progress.lock() {
@@ -692,7 +672,7 @@ impl EVBApp {
         });
     }
 
-    fn ui(&mut self, ui: &mut egui::Ui) {
+    fn content_ui(&mut self, ui: &mut egui::Ui) {
         self.progress_ui(ui);
 
         ui.menu_button("File", |ui| {
@@ -730,17 +710,17 @@ impl App for EVBApp {
         eframe::set_value(storage, eframe::APP_KEY, self);
     }
 
-    fn update(&mut self, ctx: &eframe::egui::Context, _frame: &mut eframe::Frame) {
+    fn ui(&mut self, ui: &mut egui::Ui, _frame: &mut eframe::Frame) {
         if self.window {
             egui::Window::new("CeBrA - SE-SPS Event Builder")
                 .min_width(200.0)
                 .max_width(600.0)
-                .show(ctx, |ui| {
-                    self.ui(ui);
+                .show(ui.ctx(), |ui| {
+                    self.content_ui(ui);
                 });
         } else {
-            egui::CentralPanel::default().show(ctx, |ui| {
-                self.ui(ui);
+            egui::CentralPanel::default().show_inside(ui, |ui| {
+                self.content_ui(ui);
             });
         }
     }

@@ -70,7 +70,8 @@ fn clean_up_unpack_dir(unpack_dir: &Path) -> Result<(), EVBError> {
 }
 
 fn channel_data_to_dataframe(data: ChannelData) -> Result<DataFrame, PolarsError> {
-    DataFrame::new(data.convert_to_columns())
+    let rows = data.rows;
+    DataFrame::new(rows, data.convert_to_columns())
 }
 
 struct RunParquetWriter {

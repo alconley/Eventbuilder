@@ -3,11 +3,11 @@ name = "eventbuilder"
 version = "1.0.0"
 authors = ["Alex Conley <imaconley1@gmail.com>"]
 edition = "2021"
-rust-version = "1.90"
+rust-version = "1.94"
 
 [dependencies]
-egui = "0.33.0"
-eframe = { version = "0.33.0", default-features = false, features = [
+egui = "0.34.1"
+eframe = { version = "0.34.1", default-features = false, features = [
     "default_fonts", # Embed the default egui fonts.
     "glow",          # Use the glow rendering backend. Alternative: "wgpu".
     "persistence",   # Enable restoring app state when restarting the app.
@@ -21,17 +21,17 @@ serde = { version = "1.0.219", features = ["derive"] }
 
 # native:
 [target.'cfg(not(target_arch = "wasm32"))'.dependencies]
-env_logger = "0.11.8"
-strum = "0.27.2"
-strum_macros = "0.27.2"
-rand = "0.9.2"
-bitflags = "2.9.4"
+env_logger = "0.11.10"
+strum = "0.28.0"
+strum_macros = "0.28.0"
+rand = "0.10.0"
+bitflags = "2.11.0"
 nom = "8.0.0"
 flate2 = "1.1.4"
-polars = { version = "0.51.0", features = ["parquet", "lazy", "dtype-struct"] }
-tar = "0.4.44"
+polars = { version = "0.53.0", features = ["parquet", "lazy", "dtype-struct"] }
+tar = "0.4.45"
 serde_yaml = "0.9.34"
-rfd = "0.15.4"
+rfd = "0.17.2"
 
 
 [profile.release]
