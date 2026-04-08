@@ -15,9 +15,9 @@ use super::event_builder::EventBuilder;
 use super::kinematics::{calculate_weights, KineParameters};
 use super::nuclear_data::MassMap;
 use super::scaler_list::{ScalerEntryUI, ScalerList};
+use super::shapira_fp::FocalPlaneTilt;
 use super::shift_map::{ShiftMap, ShiftMapEntry};
 use super::used_size::UsedSize;
-use super::shapira_fp::FocalPlaneTilt;
 
 //Maximum allowed size for a single dataframe: 8GB
 const MAX_USED_SIZE: usize = 16_000_000_000;
@@ -90,7 +90,7 @@ fn process_run(
 
     let mut evb = EventBuilder::new(&params.coincidence_window);
     let mut analyzed_data = ChannelData::new(params.channel_map);
-    // calculating kinematic weights for Xavg and Xshap 
+    // calculating kinematic weights for Xavg and Xshap
     let x_weights = calculate_weights(k_params, params.nuc_map);
     let xshap_params = &params.focal_plane_tilt; // JCE 12/2025
 
@@ -138,8 +138,13 @@ fn process_run(
 
         if evb.is_event_ready() {
             // analyzed_data.append_event(evb.get_ready_event(), params.channel_map, x_weights);
-            analyzed_data.append_event(evb.get_ready_event(), params.channel_map, x_weights, &xshap_params); // JCE 12/2025
-            // Check to see if we need to fragment
+            analyzed_data.append_event(
+                evb.get_ready_event(),
+                params.channel_map,
+                x_weights,
+                xshap_params,
+            ); // JCE 12/2025
+               // Check to see if we need to fragment
             if analyzed_data.get_used_size() > MAX_USED_SIZE {
                 write_dataframe_fragment(
                     analyzed_data,

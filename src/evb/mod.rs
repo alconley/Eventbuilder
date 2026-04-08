@@ -9,6 +9,6 @@ pub mod event_builder;
 pub mod kinematics;
 pub mod nuclear_data;
 pub mod scaler_list;
+pub mod shapira_fp;
 pub mod shift_map;
 pub mod used_size;
-pub mod shapira_fp;

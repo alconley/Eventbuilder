@@ -19,8 +19,8 @@ use crate::evb::error::EVBError;
 use crate::evb::kinematics::KineParameters;
 use crate::evb::nuclear_data::MassMap;
 use crate::evb::scaler_list::ScalerEntryUI;
-use crate::evb::shift_map::ShiftMapEntry;
-use crate::evb::shapira_fp::FocalPlaneTilt; //JCE 2025
+use crate::evb::shapira_fp::FocalPlaneTilt;
+use crate::evb::shift_map::ShiftMapEntry; //JCE 2025
 
 #[derive(Debug, Serialize, Deserialize)]
 struct EvbAppParams {
@@ -311,37 +311,40 @@ impl EVBApp {
 
     // JCE 2026
     fn focal_plane_ui(&mut self, ui: &mut egui::Ui) {
-    ui.label(
-        RichText::new("Focal-plane reconstruction (Shapira)")
-            .color(Color32::LIGHT_BLUE)
-            .size(18.0),
-    );
+        ui.label(
+            RichText::new("Focal-plane reconstruction (Shapira)")
+                .color(Color32::LIGHT_BLUE)
+                .size(18.0),
+        );
 
-    egui::Grid::new("fp_tilt_grid")
-        .num_columns(2)
-        .spacing([12.0, 6.0])
-        .show(ui, |ui| {
-            ui.label("α (deg)");
-            ui.add(egui::DragValue::new(&mut self.parameters.focal_plane_tilt.alpha_deg).speed(0.01));
-            ui.end_row();
+        egui::Grid::new("fp_tilt_grid")
+            .num_columns(2)
+            .spacing([12.0, 6.0])
+            .show(ui, |ui| {
+                ui.label("α (deg)");
+                ui.add(
+                    egui::DragValue::new(&mut self.parameters.focal_plane_tilt.alpha_deg)
+                        .speed(0.01),
+                );
+                ui.end_row();
 
-            ui.label("H");
-            ui.add(egui::DragValue::new(&mut self.parameters.focal_plane_tilt.h).speed(0.0001));
-            ui.end_row();
+                ui.label("H");
+                ui.add(egui::DragValue::new(&mut self.parameters.focal_plane_tilt.h).speed(0.0001));
+                ui.end_row();
 
-            // ui.label("s (mm)");
-            // ui.add(egui::DragValue::new(&mut self.parameters.focal_plane_tilt.s).speed(1.0));
-            // ui.end_row();
+                // ui.label("s (mm)");
+                // ui.add(egui::DragValue::new(&mut self.parameters.focal_plane_tilt.s).speed(1.0));
+                // ui.end_row();
+            });
+
+        ui.separator();
+
+        ui.horizontal(|ui| {
+            if ui.button("Reset defaults").clicked() {
+                self.parameters.focal_plane_tilt = FocalPlaneTilt::default();
+            }
         });
-
-    ui.separator();
-
-    ui.horizontal(|ui| {
-        if ui.button("Reset defaults").clicked() {
-            self.parameters.focal_plane_tilt = FocalPlaneTilt::default();
-        }
-    });
-}
+    }
 
     fn channel_map_ui(&mut self, ui: &mut egui::Ui) {
         ui.horizontal(|ui| {

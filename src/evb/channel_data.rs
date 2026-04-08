@@ -1,8 +1,8 @@
 use super::channel_map::{ChannelMap, ChannelType};
 #[allow(unused_imports)]
 use super::compass_data::{decompose_uuid_to_board_channel, CompassData};
-use super::used_size::UsedSize;
 use super::shapira_fp::{calculate_xshap, FocalPlaneTilt};
+use super::used_size::UsedSize;
 use crate::evb::kinematics::SPS_DETECTOR_WIRE_DIST;
 
 use std::hash::Hash;
@@ -2089,9 +2089,9 @@ impl ChannelData {
             }
         }
 
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//////////////////////////////// here's where you edit if you want to add new physics! ///////////////////////////////////
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+        //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+        //////////////////////////////// here's where you edit if you want to add new physics! ///////////////////////////////////
+        //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
         let mut x1 = INVALID_VALUE;
         let mut x2 = INVALID_VALUE;
@@ -2117,7 +2117,7 @@ impl ChannelData {
             }
 
             // --- Tilted focal plane angle (Shapira)
-            let theta_shap = (diff / (SPS_DETECTOR_WIRE_DIST*10.0)).atan();
+            let theta_shap = (diff / (SPS_DETECTOR_WIRE_DIST * 10.0)).atan();
             self.set_value(&ChannelDataField::ThetaShap, theta_shap);
 
             // first order focal plane calculation
@@ -2131,7 +2131,6 @@ impl ChannelData {
                 Some(xshap) => self.set_value(&ChannelDataField::Xshap, xshap),
                 None => self.set_value(&ChannelDataField::Xshap, INVALID_VALUE),
             };
-
 
             // let z_values: Vec<f64> = (0..400)
             //     .map(|i| -50.0 + (100.0 / 400.0) * i as f64)
