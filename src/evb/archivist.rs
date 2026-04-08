@@ -6,6 +6,7 @@ use std::sync::{
 };
 
 #[derive(serde::Deserialize, serde::Serialize, Debug, Clone)]
+#[serde(default)]
 pub struct SSH {
     pub enabled: bool,
     pub user: String,
@@ -25,6 +26,7 @@ impl Default for SSH {
 }
 
 #[derive(serde::Deserialize, serde::Serialize, Debug, Default, Clone)]
+#[serde(default)]
 pub struct Archivist {
     pub compass_path: String,
     pub output_path: String,

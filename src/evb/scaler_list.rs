@@ -8,7 +8,8 @@ const INVALID_SCALER_PATTERN: &str = "InvalidScalerPattern";
 const INVALID_SCALER_NAME: &str = "InvalidScaler";
 const INVALID_SCALER_VALUE: u64 = 0;
 
-#[derive(serde::Deserialize, serde::Serialize, Debug, Clone, PartialEq)]
+#[derive(serde::Deserialize, serde::Serialize, Debug, Clone, PartialEq, Default)]
+#[serde(default)]
 pub struct ScalerEntryUI {
     pub file_pattern: String,
     pub scaler_name: String,

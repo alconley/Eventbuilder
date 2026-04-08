@@ -5,7 +5,8 @@ use std::num::ParseIntError;
 
 use super::compass_data::generate_board_channel_uuid;
 
-#[derive(serde::Deserialize, serde::Serialize, Debug, Clone, PartialEq)]
+#[derive(serde::Deserialize, serde::Serialize, Debug, Clone, PartialEq, Default)]
+#[serde(default)]
 pub struct ShiftMapEntry {
     pub board_number: u32,
     pub channel_number: u32,

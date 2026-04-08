@@ -25,6 +25,8 @@ This modified eventbuilder version only writes columns that are present in the c
 
 Enter in the information in the UI and then use the Run button.
 
+While processing is active, the status bar at the bottom of the window shows the current run number and overall progress. A Cancel button is also available; cancelling stops the current run and removes any incomplete output file for that run.
+
 The eventbuilder asks the user to define a workspace. The workspace is a parent directory containing all of the relevant subdirectories for event building. When a workspace is chosen, the eventbuilder will check to see if a) the workspace directory exists and b) if the workspace directory contains all necessary subdirectories. It will then create directories as needed (including the parent workspace directory). CoMPASS data archives (`run_<number>.tar.gz` format) should be stored in the `raw_binary` directory of the workspace. Output files (the parquet dataframe files and scaler output files) will be written to the `built` directory of the workspace.
 
 Some important overarching notes:
@@ -45,7 +47,9 @@ A typical default value for the coincidence window is 3000 ns.
 
 To use the eventbuilder, there is one key component a user must input the channel map ids on the Channel Map UI tab. The channel map provides the the eventbuilder with information linking the CAEN digitizer board/channel numbers to detector types.
 
-These channel map ids are used to link a data from a given channel to a detector component. These channel map ids are then used to generate the data fields stored in the final dataframe product. This process can be found in the source code at src/channel_data.rs. There are two key components to converting to dataframe relevant structures. One is the ChannelDataField enum; each variant of this enum defines one single column in the dataframe. As with the ChannelType enum, adding a new column is as simple as adding a new variant to ChannelDataField; strum handles everything else. The other aspect is the ChannelData struct. ChannelData behaves much like a dictionary in Python. It contains a map of ChannelDataField variants to a single 64-bit floating point value. The `new` function implemented for ChannelData takes in a vector of CoMPASS data and then assigns it to an ChannelDataField. This is handled by a single match statement, handling each variant of the channel map. Often times these raw detector components have three associated values (energy, energy short, and timestamp). There can also be "physics" fields, fields which are calculated using raw detector data (examples of this would be x1, x2, and xavg). These do not have an associated channel map, but are rather calculated after all raw data has been handled by checking to see if the SPSData object has identified good data from the appropriate detectors components.
+These channel map ids are used to link a data from a given channel to a detector component. These channel map ids are then used to generate the data fields stored in the final dataframe product. This process can be found in the source code at `src/evb/channel_data.rs`. There are two key components to converting to dataframe relevant structures. One is the ChannelDataField enum; each variant of this enum defines one single column in the dataframe. As with the ChannelType enum, adding a new column is as simple as adding a new variant to ChannelDataField; strum handles everything else. The other aspect is the ChannelData struct. ChannelData behaves much like a dictionary in Python. It contains a map of ChannelDataField variants to a single 64-bit floating point value. The `new` function implemented for ChannelData takes in a vector of CoMPASS data and then assigns it to an ChannelDataField. This is handled by a single match statement, handling each variant of the channel map. Often times these raw detector components have three associated values (energy, energy short, and timestamp). There can also be "physics" fields, fields which are calculated using raw detector data (examples of this would be x1, x2, and xavg). These do not have an associated channel map, but are rather calculated after all raw data has been handled by checking to see if the SPSData object has identified good data from the appropriate detectors components.
+
+Missing or invalid values are written to parquet as nulls rather than as a numeric sentinel value.
 
 ### Scalers and the Scaler list
 
@@ -61,17 +65,19 @@ In the eventbuilder, nuclei are specified by Z, A. The residual is calculated fr
 
 The Set button of the kinematics section should be renamed. It does not set values, merely sets the reaction equation.
 
-### Memory Usage and Max Buffer Size
+### Memory Usage and Flush Buffer Size
 
-Once data is event built, it is stored in a map like structure which is stored on the heap until converted to a dataframe and written to disk. This does mean that the eventbuilder will need to store the entire dataset in memory (a buffer) until it is written to disk. In general this is a benefit; all file writing occurs at once, which allows the event building to proceed as quickly as possible. However, this can mean that once progress has reached 100%, the progress may "freeze" for a second before allowing a new run command, as writing data to disk can take some time.
+Once data is event built, it is stored in memory until it is converted to dataframe columns and flushed to parquet. The eventbuilder now writes a single parquet file per run while flushing buffered row groups to disk as needed during processing.
 
-As a precaution against extremely large single run datasets, the eventbuilder has a limit on the maximum size of a buffer as 8GB by default. Once the limit is reached, the eventbuilder will stop event building, convert the data and write to disk, and then resume event building. When this fragmentation happens, the the eventbuilder will append a fragment number to the output file name (i.e. `run_<run_num>_<frag_num>.parquet`). These fragment files can be combined later if needed (though in general this is not recommended). Most SPS experiments should never reach this limit, but it is a necessary precaution. This limit may need to be adjusted depending on the hardware used (the max buffer size should not exceed system memory).
+The maximum in-memory buffer size is controlled from the main UI with the `Flush Buffered Data At <X> MB` setting. When the buffered event data reaches this threshold, the eventbuilder writes the buffered rows to the current parquet output and then continues processing. Lower values reduce memory usage at the cost of more frequent flushes; higher values reduce write frequency at the cost of higher RAM use.
 
-Currently max file size is defined in `src/compass_run.rs` as a constant. Eventually this will be promoted to an user input in the GUI.
+To avoid leaving behind incomplete output, each run is first written to a temporary `.partial` parquet file. That temporary file is only renamed to the final `run_<run_num>.parquet` name after the run finishes successfully. If a run is cancelled or errors out, the incomplete temporary parquet file is removed.
 
 ### Configuration saving
 
 The File menu has options for saving and loading configurations. Configurations are stored as YAML files (using the serde and serde_yaml crates), which are human readable and editable.
+
+When loading an older configuration file, any fields that are missing will be filled in with the current default values so older YAML files remain usable as the UI evolves.
 
 ---
 

@@ -7,6 +7,7 @@ use crate::evb::kinematics::SPS_DETECTOR_WIRE_DIST;
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(default)]
 pub struct FocalPlaneTilt {
     pub alpha_deg: f64, // degrees
     pub h: f64,         // unitless until H_mm

@@ -15,6 +15,10 @@ use polars::prelude::*;
 
 const INVALID_VALUE: f64 = -1.0e6;
 
+fn invalid_to_null(value: f64) -> Option<f64> {
+    (value != INVALID_VALUE).then_some(value)
+}
+
 #[derive(Debug, Clone, Hash, Eq, PartialOrd, Ord, PartialEq, EnumIter, EnumCount, AsRefStr)]
 pub enum ChannelDataField {
     AnodeFrontEnergy,
@@ -2263,8 +2267,11 @@ impl ChannelData {
             .into_iter()
             .map(|(field, values)| {
                 let name = field.as_ref().into();
-                // Convert each field into a Series and then into a Column
-                let series = Series::new(name, values);
+                let series = Float64Chunked::from_iter_options(
+                    name,
+                    values.into_iter().map(invalid_to_null),
+                )
+                .into_series();
                 Column::Series(series.into())
             })
             .collect();
@@ -2277,13 +2284,17 @@ impl ChannelData {
             .map(|(field, nested_values)| {
                 let name = field.as_ref().into();
 
-                // Convert Vec<Vec<f64>> into a ListChunked
-                let list_chunked = ListChunked::from_iter(
-                    nested_values
-                        .into_iter()
-                        .map(|inner_vec| Some(Series::new("".into(), inner_vec))),
-                )
-                .with_name(name);
+                let list_chunked =
+                    ListChunked::from_iter(nested_values.into_iter().map(|inner_vec| {
+                        Some(
+                            Float64Chunked::from_iter_options(
+                                "".into(),
+                                inner_vec.into_iter().map(invalid_to_null),
+                            )
+                            .into_series(),
+                        )
+                    }))
+                    .with_name(name);
 
                 Column::Series(list_chunked.into_series().into())
             })

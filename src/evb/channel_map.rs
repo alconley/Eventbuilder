@@ -174,6 +174,7 @@ impl ChannelType {
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(default)]
 pub struct Board {
     pub id: u32,                     // Board ID
     pub channels: [ChannelType; 16], // Each board has 16 channels

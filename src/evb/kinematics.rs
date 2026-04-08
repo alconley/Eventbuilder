@@ -9,6 +9,7 @@ const SPS_MAGNIFICATION: f64 = 0.39; // in x-position
 pub const SPS_DETECTOR_WIRE_DIST: f64 = 4.28625; //Distance between anode wires in SPS focal plane detector cm
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(default)]
 pub struct KineParameters {
     pub target_z: u32,
     pub target_a: u32,

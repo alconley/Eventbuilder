@@ -9,6 +9,7 @@ use std::fmt::Display;
 #[derive(Debug)]
 pub enum EVBError {
     Compressor(DecompressError),
+    Cancelled,
     Waves,
     File(std::io::Error),
     Parser,
@@ -59,6 +60,7 @@ impl Display for EVBError {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
             EVBError::Compressor(x) => write!(f, "Run had a decompression error: {}", x),
+            EVBError::Cancelled => write!(f, "Run was cancelled by the user"),
             EVBError::Waves => write!(
                 f,
                 "Run found a file with waveform data, which is not supported!"

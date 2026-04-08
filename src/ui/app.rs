@@ -5,7 +5,10 @@ use std::fs::File;
 use std::io::Write;
 use std::path::Path;
 use std::path::PathBuf;
-use std::sync::{Arc, Mutex};
+use std::sync::{
+    atomic::{AtomicBool, Ordering},
+    Arc, Mutex,
+};
 use std::thread::JoinHandle;
 
 use eframe::egui::{self, Color32, RichText};
@@ -14,7 +17,7 @@ use eframe::App;
 use super::ws::{Workspace, WorkspaceError};
 use crate::evb::archivist::Archivist;
 use crate::evb::channel_map::Board;
-use crate::evb::compass_run::{process_runs, ProcessParams};
+use crate::evb::compass_run::{process_runs, ProcessParams, DEFAULT_FLUSH_BUFFER_SIZE_MB};
 use crate::evb::error::EVBError;
 use crate::evb::kinematics::KineParameters;
 use crate::evb::nuclear_data::MassMap;
@@ -23,11 +26,13 @@ use crate::evb::shapira_fp::FocalPlaneTilt;
 use crate::evb::shift_map::ShiftMapEntry; //JCE 2025
 
 #[derive(Debug, Serialize, Deserialize)]
+#[serde(default)]
 struct EvbAppParams {
     pub workspace: Option<Workspace>,
     pub kinematics: KineParameters,
     pub focal_plane_tilt: FocalPlaneTilt, //JCE 2026
     pub coincidence_window: f64,
+    pub flush_buffer_size_mb: u64,
     pub run_min: i32,
     pub run_max: i32,
     pub channel_map_entries: Vec<Board>,
@@ -43,6 +48,7 @@ impl Default for EvbAppParams {
             kinematics: KineParameters::default(),
             focal_plane_tilt: FocalPlaneTilt::default(), //JCE 2026
             coincidence_window: 3.0e3,
+            flush_buffer_size_mb: DEFAULT_FLUSH_BUFFER_SIZE_MB,
             run_min: 0,
             run_max: 0,
             channel_map_entries: Vec::new(),
@@ -71,9 +77,16 @@ impl Default for ActiveTab {
 }
 
 #[derive(serde::Deserialize, serde::Serialize, Debug, Default)]
+#[serde(default)]
 pub struct EVBApp {
     #[serde(skip)]
     progress: Arc<Mutex<f32>>,
+
+    #[serde(skip)]
+    current_run: Arc<Mutex<Option<i32>>>,
+
+    #[serde(skip)]
+    cancel_requested: Arc<AtomicBool>,
 
     parameters: EvbAppParams,
     archivist: Archivist,
@@ -97,6 +110,8 @@ impl EVBApp {
         #[cfg(not(target_arch = "wasm32"))]
         EVBApp {
             progress: Arc::new(Mutex::new(0.0)),
+            current_run: Arc::new(Mutex::new(None)),
+            cancel_requested: Arc::new(AtomicBool::new(false)),
             parameters: EvbAppParams::default(),
             archivist: Archivist::default(),
             active_tab: ActiveTab::MainTab,
@@ -117,6 +132,8 @@ impl EVBApp {
             && !self.parameters.channel_map_entries.is_empty()
         {
             let prog = self.progress.clone();
+            let current_run = self.current_run.clone();
+            let cancel_requested = self.cancel_requested.clone();
             let r_params = ProcessParams {
                 archive_dir: self
                     .parameters
@@ -141,6 +158,7 @@ impl EVBApp {
                 scaler_list: self.parameters.scaler_list_entries.clone(),
                 shift_map: self.parameters.shift_map_entries.clone(),
                 coincidence_window: self.parameters.coincidence_window,
+                flush_buffer_size_mb: self.parameters.flush_buffer_size_mb.max(1),
                 run_min: self.parameters.run_min,
                 run_max: self.parameters.run_max + 1, //Make it [run_min, run_max]
             };
@@ -149,9 +167,14 @@ impl EVBApp {
                 Ok(mut x) => *x = 0.0,
                 Err(_) => error!("Could not aquire lock at starting processor..."),
             };
+            match self.current_run.lock() {
+                Ok(mut run) => *run = None,
+                Err(_) => error!("Could not acquire current-run lock at starting processor..."),
+            };
+            self.cancel_requested.store(false, Ordering::Relaxed);
             let k_params = self.parameters.kinematics.clone();
             self.thread_handle = Some(std::thread::spawn(|| {
-                process_runs(r_params, k_params, prog)
+                process_runs(r_params, k_params, prog, current_run, cancel_requested)
             }));
         } else {
             error!("Cannot run event builder without all filepaths specified");
@@ -162,16 +185,29 @@ impl EVBApp {
     fn check_and_shutdown_processing_thread(&mut self) {
         if self.thread_handle.is_some() && self.thread_handle.as_ref().unwrap().is_finished() {
             match self.thread_handle.take().unwrap().join() {
-                Ok(result) => {
-                    match result {
-                        Ok(_) => info!("Finished processing the run"),
-                        Err(x) => {
-                            error!("An error occured while processing the run: {x}. Job stopped.")
-                        }
-                    };
-                }
+                Ok(result) => match result {
+                    Ok(_) => info!("Finished processing the run"),
+                    Err(EVBError::Cancelled) => {
+                        info!("Cancelled processing the run");
+                        match self.progress.lock() {
+                            Ok(mut progress) => *progress = 0.0,
+                            Err(_) => {
+                                error!("Could not acquire progress lock after cancellation...")
+                            }
+                        };
+                    }
+                    Err(x) => {
+                        error!("An error occured while processing the run: {x}. Job stopped.")
+                    }
+                },
                 Err(_) => error!("An error occured in joining the processing thread!"),
             };
+
+            match self.current_run.lock() {
+                Ok(mut run) => *run = None,
+                Err(_) => error!("Could not acquire current-run lock at shutdown..."),
+            };
+            self.cancel_requested.store(false, Ordering::Relaxed);
         }
     }
 
@@ -208,7 +244,7 @@ impl EVBApp {
         match serde_yaml::from_str::<EvbAppParams>(&yaml_str) {
             Ok(params) => self.parameters = params,
             Err(x) => error!(
-                "Unable to write configuration to file, serializer error: {}",
+                "Unable to read configuration from file, deserializer error: {}",
                 x
             ),
         };
@@ -258,6 +294,15 @@ impl EVBApp {
             );
             ui.end_row();
 
+            ui.label("Flush Buffered Data At");
+            ui.add(
+                egui::widgets::DragValue::new(&mut self.parameters.flush_buffer_size_mb)
+                    .speed(100)
+                    .range(1..=u64::MAX)
+                    .suffix(" MB"),
+            );
+            ui.end_row();
+
             ui.checkbox(&mut self.parameters.multiple_runs, "Multiple Runs");
             ui.label("Run Range:");
             ui.end_row();
@@ -277,6 +322,8 @@ impl EVBApp {
             } else if !self.parameters.multiple_runs {
                 self.parameters.run_max = self.parameters.run_min;
             }
+
+            self.parameters.flush_buffer_size_mb = self.parameters.flush_buffer_size_mb.max(1);
         });
     }
 
@@ -513,7 +560,7 @@ impl EVBApp {
 
     fn ui_tabs(&mut self, ui: &mut egui::Ui) {
         egui::TopBottomPanel::top("cebra_sps_top_panel").show_inside(ui, |ui| {
-            ui.horizontal(|ui| {
+            ui.horizontal_wrapped(|ui| {
                 if ui
                     .selectable_label(matches!(self.active_tab, ActiveTab::Archivist), "Archivist")
                     .clicked()
@@ -590,38 +637,58 @@ impl EVBApp {
             return;
         }
         egui::TopBottomPanel::bottom("cebra_sps_bottom_panel").show_inside(ui, |ui| {
-            ui.add(
-                egui::widgets::ProgressBar::new(match self.progress.lock() {
-                    Ok(x) => *x,
-                    Err(_) => 0.0,
-                })
-                .show_percentage(),
-            );
-
-            // Check if the thread handle exists to determine if the process is running
             let is_running = self.thread_handle.is_some();
-            if is_running {
-                ui.add(egui::Spinner::new());
-            }
+            let is_cancelling = self.cancel_requested.load(Ordering::Relaxed);
+            let progress = match self.progress.lock() {
+                Ok(x) => *x,
+                Err(_) => 0.0,
+            };
+            let current_run = match self.current_run.lock() {
+                Ok(run) => *run,
+                Err(_) => None,
+            };
 
-            if ui
-                .add_enabled(
-                    self.thread_handle.is_none(),
-                    egui::widgets::Button::new("Run"),
-                )
-                .clicked()
-            {
-                info!("Starting processor...");
-                match self.check_and_startup_processing_thread() {
-                    Ok(_) => (),
-                    Err(e) => error!(
-                        "Could not start processor, recieved the following error: {}",
-                        e
-                    ),
-                };
-            } else {
-                self.check_and_shutdown_processing_thread();
-            }
+            ui.horizontal(|ui| {
+                if is_running {
+                    if ui
+                        .add_enabled(!is_cancelling, egui::widgets::Button::new("Cancel"))
+                        .clicked()
+                    {
+                        self.cancel_requested.store(true, Ordering::Relaxed);
+                    }
+                } else if ui.button("Run").clicked() {
+                    info!("Starting processor...");
+                    match self.check_and_startup_processing_thread() {
+                        Ok(_) => (),
+                        Err(e) => error!(
+                            "Could not start processor, recieved the following error: {}",
+                            e
+                        ),
+                    };
+                }
+
+                if let Some(run) = current_run {
+                    ui.label(format!("Run {}", run));
+                } else if is_running {
+                    ui.label(if is_cancelling {
+                        "Cancelling..."
+                    } else {
+                        "Preparing..."
+                    });
+                }
+
+                if is_running {
+                    ui.add(egui::Spinner::new());
+                }
+
+                ui.add(
+                    egui::widgets::ProgressBar::new(progress)
+                        .show_percentage()
+                        .desired_width(ui.available_width().max(120.0)),
+                );
+            });
+
+            self.check_and_shutdown_processing_thread();
         });
     }
 
