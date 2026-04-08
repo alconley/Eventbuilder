@@ -20,11 +20,13 @@ use crate::evb::kinematics::KineParameters;
 use crate::evb::nuclear_data::MassMap;
 use crate::evb::scaler_list::ScalerEntryUI;
 use crate::evb::shift_map::ShiftMapEntry;
+use crate::evb::shapira_fp::FocalPlaneTilt; //JCE 2025
 
 #[derive(Debug, Serialize, Deserialize)]
 struct EvbAppParams {
     pub workspace: Option<Workspace>,
     pub kinematics: KineParameters,
+    pub focal_plane_tilt: FocalPlaneTilt, //JCE 2026
     pub coincidence_window: f64,
     pub run_min: i32,
     pub run_max: i32,
@@ -39,6 +41,7 @@ impl Default for EvbAppParams {
         EvbAppParams {
             workspace: None,
             kinematics: KineParameters::default(),
+            focal_plane_tilt: FocalPlaneTilt::default(), //JCE 2026
             coincidence_window: 3.0e3,
             run_min: 0,
             run_max: 0,
@@ -55,6 +58,7 @@ enum ActiveTab {
     Archivist,
     MainTab,
     Kinematics,
+    FocalPlaneTilt, //JCE 2026
     ChannelMap,
     ShiftMap,
     ScalerList,
@@ -132,6 +136,7 @@ impl EVBApp {
                     .as_ref()
                     .unwrap()
                     .get_output_dir()?,
+                focal_plane_tilt: self.parameters.focal_plane_tilt.clone(), // JCE 2026
                 channel_map: self.parameters.channel_map_entries.clone(),
                 scaler_list: self.parameters.scaler_list_entries.clone(),
                 shift_map: self.parameters.shift_map_entries.clone(),
@@ -303,6 +308,40 @@ impl EVBApp {
             }
         }
     }
+
+    // JCE 2026
+    fn focal_plane_ui(&mut self, ui: &mut egui::Ui) {
+    ui.label(
+        RichText::new("Focal-plane reconstruction (Shapira)")
+            .color(Color32::LIGHT_BLUE)
+            .size(18.0),
+    );
+
+    egui::Grid::new("fp_tilt_grid")
+        .num_columns(2)
+        .spacing([12.0, 6.0])
+        .show(ui, |ui| {
+            ui.label("α (deg)");
+            ui.add(egui::DragValue::new(&mut self.parameters.focal_plane_tilt.alpha_deg).speed(0.01));
+            ui.end_row();
+
+            ui.label("H");
+            ui.add(egui::DragValue::new(&mut self.parameters.focal_plane_tilt.h).speed(0.0001));
+            ui.end_row();
+
+            // ui.label("s (mm)");
+            // ui.add(egui::DragValue::new(&mut self.parameters.focal_plane_tilt.s).speed(1.0));
+            // ui.end_row();
+        });
+
+    ui.separator();
+
+    ui.horizontal(|ui| {
+        if ui.button("Reset defaults").clicked() {
+            self.parameters.focal_plane_tilt = FocalPlaneTilt::default();
+        }
+    });
+}
 
     fn channel_map_ui(&mut self, ui: &mut egui::Ui) {
         ui.horizontal(|ui| {
@@ -498,6 +537,15 @@ impl EVBApp {
                 }
                 if ui
                     .selectable_label(
+                        matches!(self.active_tab, ActiveTab::FocalPlaneTilt),
+                        "Shapira Focal Plane",
+                    )
+                    .clicked()
+                {
+                    self.active_tab = ActiveTab::FocalPlaneTilt;
+                }
+                if ui
+                    .selectable_label(
                         matches!(self.active_tab, ActiveTab::ChannelMap),
                         "Channel Map",
                     )
@@ -527,6 +575,7 @@ impl EVBApp {
             ActiveTab::Archivist => self.archivist.ui(ui),
             ActiveTab::MainTab => self.main_tab_ui(ui),
             ActiveTab::Kinematics => self.kinematics_ui(ui),
+            ActiveTab::FocalPlaneTilt => self.focal_plane_ui(ui), //JCE 2026
             ActiveTab::ChannelMap => self.channel_map_ui(ui),
             ActiveTab::ShiftMap => self.shift_map_ui(ui),
             ActiveTab::ScalerList => self.scaler_list_ui(ui),

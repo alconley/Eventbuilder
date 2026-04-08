@@ -17,6 +17,7 @@ use super::nuclear_data::MassMap;
 use super::scaler_list::{ScalerEntryUI, ScalerList};
 use super::shift_map::{ShiftMap, ShiftMapEntry};
 use super::used_size::UsedSize;
+use super::shapira_fp::FocalPlaneTilt;
 
 //Maximum allowed size for a single dataframe: 8GB
 const MAX_USED_SIZE: usize = 16_000_000_000;
@@ -29,6 +30,7 @@ struct RunParams<'a> {
     pub scalerlist: Vec<ScalerEntryUI>,
     pub scalerout_file_path: PathBuf,
     pub nuc_map: &'a MassMap,
+    pub focal_plane_tilt: &'a FocalPlaneTilt, // JCE 2026
     pub channel_map: &'a ChannelMap,
     pub shift_map: &'a Option<ShiftMap>,
     pub coincidence_window: f64,
@@ -88,7 +90,9 @@ fn process_run(
 
     let mut evb = EventBuilder::new(&params.coincidence_window);
     let mut analyzed_data = ChannelData::new(params.channel_map);
+    // calculating kinematic weights for Xavg and Xshap 
     let x_weights = calculate_weights(k_params, params.nuc_map);
+    let xshap_params = &params.focal_plane_tilt; // JCE 12/2025
 
     let mut earliest_file_index: Option<usize>;
 
@@ -133,7 +137,8 @@ fn process_run(
         }
 
         if evb.is_event_ready() {
-            analyzed_data.append_event(evb.get_ready_event(), params.channel_map, x_weights);
+            // analyzed_data.append_event(evb.get_ready_event(), params.channel_map, x_weights);
+            analyzed_data.append_event(evb.get_ready_event(), params.channel_map, x_weights, &xshap_params); // JCE 12/2025
             // Check to see if we need to fragment
             if analyzed_data.get_used_size() > MAX_USED_SIZE {
                 write_dataframe_fragment(
@@ -203,6 +208,7 @@ pub struct ProcessParams {
     pub archive_dir: PathBuf,
     pub unpack_dir: PathBuf,
     pub output_dir: PathBuf,
+    pub focal_plane_tilt: FocalPlaneTilt, // JCE 2026
     pub channel_map: Vec<Board>,
     pub scaler_list: Vec<ScalerEntryUI>,
     pub shift_map: Vec<ShiftMapEntry>,
@@ -240,6 +246,7 @@ pub fn process_runs(
                 .join("scalers") // Append the "scalers" directory
                 .join(format!("run_{}_scalers.txt", run)),
             nuc_map: &mass_map,
+            focal_plane_tilt: &params.focal_plane_tilt, // JCE 2026
             channel_map: &channel_map,
             shift_map: &Some(shift_map.clone()),
             coincidence_window: params.coincidence_window,

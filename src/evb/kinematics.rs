@@ -6,7 +6,7 @@ const C: f64 = 2.99792458e8; //speed of light in m/s
 const QBRHO2P: f64 = C * 1.0e-9; //convert charge (in units of e) * B (kG (tesla)) * rho (cm) to momentum in MeV
 const SPS_DISPERSION: f64 = 1.96; // x-position/rho
 const SPS_MAGNIFICATION: f64 = 0.39; // in x-position
-const SPS_DETECTOR_WIRE_DIST: f64 = 4.28625; //Distance between anode wires in SPS focal plane detector cm
+pub const SPS_DETECTOR_WIRE_DIST: f64 = 4.28625; //Distance between anode wires in SPS focal plane detector cm
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct KineParameters {
@@ -180,11 +180,14 @@ fn calculate_z_offset(params: &KineParameters, nuc_map: &MassMap) -> Option<f64>
     Some(-rho * SPS_DISPERSION * SPS_MAGNIFICATION * k)
 }
 
-//Calculate weights for correcting focal plane position for kinematic shift
-//Returns tuple of weights where should be used like xavg = x1 * result.0 + x2 * result.1
+// Calculate weights for correcting focal plane position for kinematic shift
+// Returns tuple of weights where should be used like xavg = x1 * result.0 + x2 * result.1
 pub fn calculate_weights(params: &KineParameters, nuc_map: &MassMap) -> Option<(f64, f64)> {
     let z_offset = calculate_z_offset(params, nuc_map)?;
+    println!("Calculated z-offset = {:.6} cm", z_offset);
+
     let w1 = 0.5 - z_offset / SPS_DETECTOR_WIRE_DIST;
     let w2 = 1.0 - w1;
+    println!("Calculated weights = (w1 = {:.6}, w2 = {:.6})", w1, w2);
     Some((w1, w2))
 }

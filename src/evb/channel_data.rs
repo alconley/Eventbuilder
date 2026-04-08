@@ -2,6 +2,9 @@ use super::channel_map::{ChannelMap, ChannelType};
 #[allow(unused_imports)]
 use super::compass_data::{decompose_uuid_to_board_channel, CompassData};
 use super::used_size::UsedSize;
+use super::shapira_fp::{calculate_xshap, FocalPlaneTilt};
+use crate::evb::kinematics::SPS_DETECTOR_WIRE_DIST;
+
 use std::hash::Hash;
 use std::{collections::BTreeMap, vec};
 
@@ -47,7 +50,9 @@ pub enum ChannelDataField {
     X1,
     X2,
     Xavg,
+    Xshap,
     Theta,
+    ThetaShap,
     // X,
     // Z,
     Cebra0Energy,
@@ -408,9 +413,12 @@ impl ChannelDataField {
                     ChannelDataField::X1
                     | ChannelDataField::X2
                     | ChannelDataField::Xavg
+                    | ChannelDataField::Xshap
+                    | ChannelDataField::ThetaShap
                     // | ChannelDataField::X
                     // | ChannelDataField::Z
                     | ChannelDataField::Theta => all_delay_lines_present,
+
                     // Filter other fields based on the channel map
                     ChannelDataField::AnodeFrontEnergy
                     | ChannelDataField::AnodeFrontShort
@@ -1230,6 +1238,7 @@ impl ChannelData {
         event: Vec<CompassData>,
         map: &ChannelMap,
         weights: Option<(f64, f64)>,
+        xshap_params: &FocalPlaneTilt, // JCE 12/2025
     ) {
         self.rows += 1;
         self.push_defaults();
@@ -2080,7 +2089,10 @@ impl ChannelData {
             }
         }
 
-        //Physics
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////// here's where you edit if you want to add new physics! ///////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
         let mut x1 = INVALID_VALUE;
         let mut x2 = INVALID_VALUE;
         if dfr_time != INVALID_VALUE && dfl_time != INVALID_VALUE {
@@ -2104,10 +2116,22 @@ impl ChannelData {
                 self.set_value(&ChannelDataField::Theta, std::f64::consts::PI * 0.5);
             }
 
+            // --- Tilted focal plane angle (Shapira)
+            let theta_shap = (diff / (SPS_DETECTOR_WIRE_DIST*10.0)).atan();
+            self.set_value(&ChannelDataField::ThetaShap, theta_shap);
+
+            // first order focal plane calculation
             match weights {
                 Some(w) => self.set_value(&ChannelDataField::Xavg, w.0 * x1 + w.1 * x2),
                 None => self.set_value(&ChannelDataField::Xavg, INVALID_VALUE),
             };
+
+            // geometrical focal plane (Shapira)
+            match calculate_xshap(x1, x2, xshap_params) {
+                Some(xshap) => self.set_value(&ChannelDataField::Xshap, xshap),
+                None => self.set_value(&ChannelDataField::Xshap, INVALID_VALUE),
+            };
+
 
             // let z_values: Vec<f64> = (0..400)
             //     .map(|i| -50.0 + (100.0 / 400.0) * i as f64)

@@ -11,3 +11,4 @@ pub mod nuclear_data;
 pub mod scaler_list;
 pub mod shift_map;
 pub mod used_size;
+pub mod shapira_fp;
